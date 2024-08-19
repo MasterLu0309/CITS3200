@@ -1,9 +1,10 @@
 import polhemus
 
-'''
-Takes in an 'int' amount of polhemus trackers to initialise and returns a list of all the tracker objects.
-'''
+
 def initialise_trackers(amount: int) -> list:
+    """
+    Takes in an 'int' amount of polhemus trackers to initialise and returns a list of all the tracker objects.
+    """
     tracker_list = [None]*amount
     for i in range(amount):
         tracker_list[i] = polhemus.polhemus()
@@ -11,11 +12,11 @@ def initialise_trackers(amount: int) -> list:
         tracker_list[i].Run()
     return tracker_list
 
-'''
-Takes in list of tracker objects, reads the data from each tracker, and returns a list of dictionaries containing
-the data for each tracker. 
-'''
 def get_tracker_data(tracker_list: list) -> list[dict]:
+    """
+    Takes in list of tracker objects, reads the data from each tracker, and returns a list of dictionaries containing
+    the data for each tracker. 
+    """
     tracker_amount = len(tracker_list)
     data = [None]*tracker_amount
     for i in range(tracker_amount):
@@ -38,10 +39,9 @@ def get_tracker_data(tracker_list: list) -> list[dict]:
         }
     return data
 
-
-'''
-Closes provided list of tracker objects.
-'''
 def close_trackers(tracker_list: list):
+    """
+    Closes provided list of tracker objects.
+    """
     for i in range(len(tracker_list)):
         tracker_list[i].Close()
