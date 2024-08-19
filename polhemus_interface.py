@@ -37,3 +37,11 @@ def get_tracker_data(tracker_list: list) -> list[dict]:
             "Sensor2": tracker_list[i].Sensor2
         }
     return data
+
+
+'''
+Closes provided list of tracker objects.
+'''
+def close_trackers(tracker_list: list):
+    for i in range(len(tracker_list)):
+        tracker_list[i].Close()
