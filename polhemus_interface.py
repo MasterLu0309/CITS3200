@@ -55,7 +55,10 @@ def get_polhemus_data(tracker_list: list, stylus: bool) -> list[dict]:
                 "PositionZ2": tracker_list[i].PositionTooltipZ2,
                 "AngleX2": tracker_list[i].AngleX2,
                 "AngleY2": tracker_list[i].AngleY2,
-                "AngleZ2": tracker_list[i].AngleZ2
+                "AngleZ2": tracker_list[i].AngleZ2,
+                "StylusButton": 0,
+                "Sensor1": 0,
+                "Sensor2": 0
             }
     return data
 
@@ -70,8 +73,10 @@ def close_trackers(tracker_list: list):
 if __name__ == "__main__":
     trackers = initialise_polhemus(1)
     with open("test_output.csv", "w") as file:
+        file.write("Timestamp,PositionX1,PositionY1,PositionZ1,AngleX1,AngleY1,AngleZ1,PositionX2,PositionY2,PositionZ2,AngleX2,AngleY2,AngleZ2,StylusButton,Sensor1,Sensor2\n")
         while True:
             data = get_polhemus_data(trackers, False)
-            print(data)
-            file.write(str(data) + "\n")
+            current_data = f"{data[0]['Timestamp']},{data[0]['PositionX1']},{data[0]['PositionY1']},{data[0]['PositionZ1']},{data[0]['AngleX1']},{data[0]['AngleY1']},{data[0]['AngleZ1']},{data[0]['PositionX2']},{data[0]['PositionY2']},{data[0]['PositionZ2']},{data[0]['AngleX2']},{data[0]['AngleY2']},{data[0]['AngleZ2']},0,0,0"
+            print(current_data)
+            file.write(current_data + "\n")
             time.sleep(0.1)
