@@ -1,6 +1,9 @@
 import polhemus
 import time
 
+# Requires Polhemus Liberty USB driver to be installed for communication
+# https://ftp.polhemus1.com/pub/Trackers/Liberty/
+# WARNING: Above driver is NOT COMPATIBLE with Windows 11's 'Core Isolation' security feature.
 
 def initialise_polhemus(amount: int) -> list:
     """
