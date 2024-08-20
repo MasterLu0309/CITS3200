@@ -70,7 +70,12 @@ def close_trackers(tracker_list: list):
         tracker_list[i].Close()
 
 
+
+# FOR TESTING
 if __name__ == "__main__":
+
+    hz = 10
+
     trackers = initialise_polhemus(1)
     with open("test_output.csv", "w") as file:
         file.write("Timestamp,PositionX1,PositionY1,PositionZ1,AngleX1,AngleY1,AngleZ1,PositionX2,PositionY2,PositionZ2,AngleX2,AngleY2,AngleZ2,StylusButton,Sensor1,Sensor2\n")
@@ -79,4 +84,4 @@ if __name__ == "__main__":
             current_data = f"{data[0]['Timestamp']},{data[0]['PositionX1']},{data[0]['PositionY1']},{data[0]['PositionZ1']},{data[0]['AngleX1']},{data[0]['AngleY1']},{data[0]['AngleZ1']},{data[0]['PositionX2']},{data[0]['PositionY2']},{data[0]['PositionZ2']},{data[0]['AngleX2']},{data[0]['AngleY2']},{data[0]['AngleZ2']},0,0,0"
             print(current_data)
             file.write(current_data + "\n")
-            time.sleep(0.1)
+            time.sleep(1/hz)
