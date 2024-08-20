@@ -21,7 +21,9 @@ def get_tracker_data(tracker_list: list) -> list[dict]:
     data = [None]*tracker_amount
     for i in range(tracker_amount):
         tracker_list[i].Run() # This method seems to not initialise the tracker, but rather read in the data from it.
+        timestamp = time.time()
         data[i] = {
+            "Timestamp": timestamp,
             "PositionTooltipX1": tracker_list[i].PositionTooltipX1,
             "PositionTooltipY1": tracker_list[i].PositionTooltipY1,
             "PositionTooltipZ1": tracker_list[i].PositionTooltipZ1,
