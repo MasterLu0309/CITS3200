@@ -1,4 +1,5 @@
 import polhemus
+import time
 
 
 def initialise_trackers(amount: int) -> list:
@@ -45,3 +46,13 @@ def close_trackers(tracker_list: list):
     """
     for i in range(len(tracker_list)):
         tracker_list[i].Close()
+
+
+if __name__ == "__main__":
+    trackers = initialise_trackers(1)
+    with open("test_output.csv", "w") as file:
+        while True:
+            data = get_tracker_data(trackers)
+            print(data)
+            file.write(str(data) + "\n")
+            time.sleep(0.1)
