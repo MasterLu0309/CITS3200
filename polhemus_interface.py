@@ -10,7 +10,6 @@ def initialise_trackers(amount: int) -> list:
     for i in range(amount):
         tracker_list[i] = polhemus.polhemus()
         tracker_list[i].Initialize()
-        tracker_list[i].Run()
     return tracker_list
 
 def get_tracker_data(tracker_list: list) -> list[dict]:
@@ -21,6 +20,7 @@ def get_tracker_data(tracker_list: list) -> list[dict]:
     tracker_amount = len(tracker_list)
     data = [None]*tracker_amount
     for i in range(tracker_amount):
+        tracker_list[i].Run() # This method seems to not initialise the tracker, but rather read in the data from it.
         data[i] = {
             "PositionTooltipX1": tracker_list[i].PositionTooltipX1,
             "PositionTooltipY1": tracker_list[i].PositionTooltipY1,
