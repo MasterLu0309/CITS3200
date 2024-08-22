@@ -3,11 +3,13 @@ from tkinter import filedialog
 import threading
 import polhemus_interface as pol
 import shutil
+import os
 
 STARTED = False
 
 # Create the main window
 window = tk.Tk()
+window.title("Tracker Interface")
 
 # Add Label
 label = tk.Label(window, text="Polling Rate (Hz):")
@@ -66,5 +68,6 @@ file_picker_button.pack()
 
 # Start the main event loop
 if __name__ == "__main__":
+    os.remove("test_output.csv")
     pol.initialise_polhemus(1)
     window.mainloop()
