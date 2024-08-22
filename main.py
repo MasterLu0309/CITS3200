@@ -68,6 +68,9 @@ file_picker_button.pack()
 
 # Start the main event loop
 if __name__ == "__main__":
-    os.remove("test_output.csv")
+    try:
+        os.remove("test_output.csv")
+    except:
+        pass
     pol.initialise_polhemus(1)
     window.mainloop()
