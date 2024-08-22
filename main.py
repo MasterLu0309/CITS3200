@@ -23,10 +23,12 @@ def stop_output():
 
 
 def start_output():
+    global STARTED
     # Check if hz is valid
     try:
         hz = int(hz_field.get())
     except:
+        STARTED = False
         raise ValueError("Please enter a valid integer for the frequency.")
 
     pol.output_data(hz)
