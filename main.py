@@ -5,9 +5,13 @@ import polhemus_interface as pol
 # Create the main window
 window = tk.Tk()
 
+# Add Label
+label = tk.Label(window, text="Polling Rate (Hz):")
+label.pack(side=tk.LEFT)
+
 # Add Text Entry Field
 hz_field = tk.Entry(window)
-hz_field.pack()
+hz_field.pack(side=tk.LEFT)
 
 # Add widgets and functionality here
 def stop_output():
