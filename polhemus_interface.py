@@ -5,6 +5,8 @@ import time
 # https://ftp.polhemus1.com/pub/Trackers/Liberty/
 # WARNING: Above driver is NOT COMPATIBLE with Windows 11's 'Core Isolation' security feature.
 
+another = False
+
 def initialise_polhemus(amount: int) -> list:
     """
     Takes in an 'int' amount of polhemus trackers to initialise and returns a list of all the tracker objects.
@@ -72,17 +74,14 @@ def close_trackers(tracker_list: list):
     for i in range(len(tracker_list)):
         tracker_list[i].Close()
 
-
-
-# FOR TESTING
-if __name__ == "__main__":
-
-    hz = 10
+def output_data(hz: int):
+    global another
+    another = True
 
     trackers = initialise_polhemus(1)
     with open("test_output.csv", "w") as file:
         file.write("Timestamp,PositionX1,PositionY1,PositionZ1,AngleX1,AngleY1,AngleZ1,PositionX2,PositionY2,PositionZ2,AngleX2,AngleY2,AngleZ2,StylusButton,Sensor1,Sensor2\n")
-        while True:
+        while another:
             data = get_polhemus_data(trackers, False)
             current_data = f"{data[0]['Timestamp']},{data[0]['PositionX1']},{data[0]['PositionY1']},{data[0]['PositionZ1']},{data[0]['AngleX1']},{data[0]['AngleY1']},{data[0]['AngleZ1']},{data[0]['PositionX2']},{data[0]['PositionY2']},{data[0]['PositionZ2']},{data[0]['AngleX2']},{data[0]['AngleY2']},{data[0]['AngleZ2']},0,0,0"
             print(current_data)
