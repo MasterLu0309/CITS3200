@@ -2,6 +2,8 @@ import tkinter as tk
 import threading
 import polhemus_interface as pol
 
+STARTED = False
+
 # Create the main window
 window = tk.Tk()
 
@@ -15,7 +17,10 @@ hz_field.pack(side=tk.LEFT)
 
 # Add widgets and functionality here
 def stop_output():
+    global STARTED
     pol.another = False
+    STARTED = False
+
 
 def start_output():
     # Check if hz is valid
@@ -27,7 +32,12 @@ def start_output():
     pol.output_data(hz)
 
 def begin_tracking():
-    threading.Thread(target=start_output).start()
+    global STARTED
+    if not STARTED:
+        STARTED = True
+        threading.Thread(target=start_output).start()
+    else:
+        print("Already started.")
 
 # Add Button 1
 button1 = tk.Button(window, text="Start", command=begin_tracking)
