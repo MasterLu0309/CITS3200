@@ -1,6 +1,8 @@
 import tkinter as tk
+from tkinter import filedialog
 import threading
 import polhemus_interface as pol
+import shutil
 
 STARTED = False
 
@@ -41,6 +43,15 @@ def begin_tracking():
     else:
         print("Already started.")
 
+def open_file_picker():
+    if not STARTED:
+        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
+        print(file_path)
+        shutil.copy("test_output.csv", file_path)
+    else:
+        print("Cannot save file while tracking.")
+
+
 # Add Button 1
 button1 = tk.Button(window, text="Start", command=begin_tracking)
 button1.pack()
@@ -48,6 +59,10 @@ button1.pack()
 # Add Button 2
 button2 = tk.Button(window, text="Stop", command=stop_output)
 button2.pack()
+
+# File picker
+file_picker_button = tk.Button(window, text="Save csv to...", command=open_file_picker)
+file_picker_button.pack()
 
 # Start the main event loop
 if __name__ == "__main__":
