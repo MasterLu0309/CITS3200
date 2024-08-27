@@ -6,3 +6,4 @@ with open("BVH-Recording3.bvh") as f:
 
 # Extract and print basic information
 print(f"Number of frames: {bvh_data.nframes}")
+print(f"Frame time: {bvh_data.frame_time}")
