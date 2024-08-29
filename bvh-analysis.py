@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from bvh import Bvh
 import numpy as np
 
@@ -41,3 +42,12 @@ for i in range(len(upper_x_rot)):
     cos_angle = dot_product / (norm_upper * norm_lower)
     angle = np.arccos(cos_angle)
     angles.append(np.degrees(angle))
+
+# Plot the angles over time
+plt.figure(figsize=(10, 5))
+plt.plot(angles, label='Angle between RIGHT_UPPER_LEG and RIGHT_LOWER_LEG', color='green')
+plt.xlabel('Frame')
+plt.ylabel('Angle (degrees)')
+plt.title('Angle between RIGHT_UPPER_LEG and RIGHT_LOWER_LEG over time')
+plt.legend()
+plt.show()
