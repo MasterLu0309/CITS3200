@@ -14,3 +14,4 @@ for i in range(num_devices):
       # Get the device's pose (position and orientation)
       pose = steamvr.get_device_pose(i)
       position = pose.m[12:15] # Extract position (x, y, z)
+      print(f"Tracker {i} position {position}")
