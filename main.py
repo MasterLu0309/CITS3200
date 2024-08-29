@@ -18,6 +18,9 @@ leapmotion_thread = None
 window = tk.Tk()
 window.title("Tracker Interface")
 
+POLHEMUS = tk.BooleanVar()
+LEAPMOTION = tk.BooleanVar()
+
 # Add Label
 label = tk.Label(window, text="Polling Rate (Hz):")
 label.pack(side=tk.LEFT)
@@ -30,12 +33,19 @@ hz_field.pack(side=tk.LEFT)
 stopwatch_label = tk.Label(window, text="00:00:00.000")
 stopwatch_label.pack()
 
-# Add widgets and functionality here
+# Add checkboxes
+polhemus_checkbox = tk.Checkbutton(window, text="Polhemus", variable=POLHEMUS)
+polhemus_checkbox.pack()
+leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION)
+leapmotion_checkbox.pack()
+
 def stop_output():
     global STARTED
-    pol.another = False
-    leapm.another = False
-    leapm.connection.disconnect()
+    if POLHEMUS.get():
+        pol.another = False
+    if LEAPMOTION.get():
+        leapm.another = False
+        leapm.connection.disconnect()
     STARTED = False
 
 
@@ -57,10 +67,13 @@ def begin_tracking():
         start_time = time.time()
         stopwatch_label.config(text="00:00:00")
         start_stopwatch()
-        polhemus_thread = threading.Thread(target=start_output, daemon=True)
-        polhemus_thread.start()
-        leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
-        leapmotion_thread.start()
+        if POLHEMUS.get():
+            polhemus_thread = threading.Thread(target=start_output, daemon=True)
+            polhemus_thread.start()
+        if LEAPMOTION.get():
+            leapm.another = True
+            leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
+            leapmotion_thread.start()
     else:
         print("Already started.")
 
