@@ -11,6 +11,8 @@ import time
 STARTED = False
 
 start_time = None
+polhemus_thread = None
+leapmotion_thread = None
 
 # Create the main window
 window = tk.Tk()
@@ -32,6 +34,8 @@ stopwatch_label.pack()
 def stop_output():
     global STARTED
     pol.another = False
+    leapm.another = False
+    leapm.connection.disconnect()
     STARTED = False
 
 
@@ -53,7 +57,10 @@ def begin_tracking():
         start_time = time.time()
         stopwatch_label.config(text="00:00:00")
         start_stopwatch()
-        threading.Thread(target=start_output, daemon=True).start()
+        polhemus_thread = threading.Thread(target=start_output, daemon=True)
+        polhemus_thread.start()
+        leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
+        leapmotion_thread.start()
     else:
         print("Already started.")
 
@@ -100,5 +107,4 @@ if __name__ == "__main__":
     except:
         pass
     pol.initialise_polhemus(1)
-    threading.Thread(target=leapm.initialise_leapmotion, daemon=True).start()
     window.mainloop()
