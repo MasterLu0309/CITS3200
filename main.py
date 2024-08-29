@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import filedialog
 import threading
 import polhemus_interface as pol
+from leapmotion_interface import MyListener
 import shutil
 import os
 import time
+import leap
 
 STARTED = False
 
@@ -51,7 +53,7 @@ def begin_tracking():
         start_time = time.time()
         stopwatch_label.config(text="00:00:00")
         start_stopwatch()
-        threading.Thread(target=start_output).start()
+        threading.Thread(target=start_output, daemon=True).start()
     else:
         print("Already started.")
 
@@ -76,6 +78,19 @@ def start_stopwatch():
         stopwatch_label.config(text=time_str)
         window.after(10, start_stopwatch) 
 
+def initialise_leapmotion():
+    my_listener = MyListener()
+
+    connection = leap.Connection()
+    connection.add_listener(my_listener)
+
+    running = True
+
+    with connection.open():
+        connection.set_tracking_mode(leap.TrackingMode.Desktop)
+        while running:
+            time.sleep(1)
+
 
 # Add Button 1
 button1 = tk.Button(window, text="Start", command=begin_tracking)
@@ -96,4 +111,5 @@ if __name__ == "__main__":
     except:
         pass
     pol.initialise_polhemus(1)
+    threading.Thread(target=initialise_leapmotion, daemon=True).start()
     window.mainloop()
