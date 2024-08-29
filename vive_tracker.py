@@ -16,7 +16,7 @@ def get_tracker_data():
             device_class = openvr.VRSystem().getTrackedDeviceClass(i)
             if device_class == openvr.TrackedDeviceClass_TrackingReference:
                 print(f"Tracker {i} data:")
-                print(f"poses[i].mDeviceToAbsoluteTracking")
+                print(poses[i].mDeviceToAbsoluteTracking)
 
 try:
     while True:
