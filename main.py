@@ -43,7 +43,7 @@ leapmotion_checkbox.pack()
 # Tkinter comboboxw (dropdown)
 options = ["Desktop", "Head Mounted", "Screentop"]
 leapmotion_mode = ttk.Combobox(window, values=options, state="readonly")
-leapmotion_mode.set("Leapmotion mode")
+leapmotion_mode.set("Leapmotion mode...")
 leapmotion_mode.pack(side=tk.LEFT)
 
 def stop_output():
@@ -68,6 +68,8 @@ def start_output():
     pol.output_data(hz)
 
 def begin_tracking():
+    if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
+        raise ValueError("Please select a valid mode for Leapmotion.")
     global STARTED, start_time
     if not STARTED:
         STARTED = True
