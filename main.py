@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
@@ -39,6 +39,12 @@ polhemus_checkbox.pack()
 leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION)
 leapmotion_checkbox.pack()
 
+# Tkinter comboboxw (dropdown)
+options = ["Desktop", "Head Mounted", "Screentop"]
+leapmotion_mode = ttk.Combobox(window, values=options, state="readonly")
+leapmotion_mode.set("Leapmotion mode")
+leapmotion_mode.pack(side=tk.LEFT)
+
 def stop_output():
     global STARTED
     if POLHEMUS.get():
@@ -72,6 +78,7 @@ def begin_tracking():
             polhemus_thread.start()
         if LEAPMOTION.get():
             leapm.another = True
+            leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
             leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
             leapmotion_thread.start()
     else:

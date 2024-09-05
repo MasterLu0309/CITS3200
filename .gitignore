@@ -139,3 +139,4 @@ cython_debug/
 test_output.csv
 leapc/*
 leapmotion_example.py
+leapmotion_output.csv

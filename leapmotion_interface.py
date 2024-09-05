@@ -20,6 +20,14 @@ import json
 another = True
 connection = None
 
+tracking_modes = {
+    "Desktop": leap.TrackingMode.Desktop,
+    "Head Mounted": leap.TrackingMode.HMD,
+    "Screentop": leap.TrackingMode.ScreenTop
+}
+
+SELECTED_MODE = None
+
 class MyListener(leap.Listener):
     def __init__(self):
         self.hands = []
@@ -57,7 +65,7 @@ def initialise_leapmotion(hz: int):
         file.write(headers)
         file.write("\n")
         with connection.open():
-            connection.set_tracking_mode(leap.TrackingMode.Desktop)
+            connection.set_tracking_mode(SELECTED_MODE)
             while running:
                 for hand in my_listener.hands:
                     hand_data["left" if hand.type == leap.HandType.Left else "right"] = {
