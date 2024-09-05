@@ -79,7 +79,7 @@ def output_data(hz: int):
     another = True
 
     trackers = initialise_polhemus(1)
-    with open("test_output.csv", "w") as file:
+    with open("polhemus_output.csv", "w") as file:
         file.write("Timestamp,PositionX1,PositionY1,PositionZ1,AngleX1,AngleY1,AngleZ1,PositionX2,PositionY2,PositionZ2,AngleX2,AngleY2,AngleZ2,StylusButton,Sensor1,Sensor2\n")
         while another:
             data = get_polhemus_data(trackers, False)

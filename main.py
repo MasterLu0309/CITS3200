@@ -5,6 +5,7 @@ import polhemus_interface as pol
 import leapmotion_interface as leapm
 import shutil
 import os
+import zipfile
 import time
 
 
@@ -86,9 +87,9 @@ def begin_tracking():
 
 def open_file_picker():
     if not STARTED:
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP Files", "*.zip")])
         print(file_path)
-        shutil.copy("test_output.csv", file_path)
+        zip_files(["polhemus_output.csv", "leapmotion_output.csv"], file_path)
     else:
         print("Cannot save file while tracking.")
 
@@ -105,7 +106,14 @@ def start_stopwatch():
         stopwatch_label.config(text=time_str)
         window.after(10, start_stopwatch) 
 
-
+def zip_files(files: list[str], zip_name: str):
+    with zipfile.ZipFile(zip_name, "w") as zipf:
+        for file in files:
+            try:
+                zipf.write(file, os.path.basename(file))
+            except:
+                # File does not exist (that tracker must not have been used)
+                pass
 
 
 # Add Button 1
@@ -117,13 +125,17 @@ button2 = tk.Button(window, text="Stop", command=stop_output)
 button2.pack()
 
 # File picker
-file_picker_button = tk.Button(window, text="Save csv to...", command=open_file_picker)
+file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
 file_picker_button.pack()
 
 # Start the main event loop
 if __name__ == "__main__":
     try:
-        os.remove("test_output.csv")
+        os.remove("polhemus_output.csv")
+    except:
+        pass
+    try:
+        os.remove("leapmotion_output.csv")
     except:
         pass
     pol.initialise_polhemus(1)
