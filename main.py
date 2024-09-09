@@ -18,33 +18,37 @@ leapmotion_thread = None
 # Create the main window
 window = tk.Tk()
 window.title("Tracker Interface")
+#window.geometry("600x300")
 
 POLHEMUS = tk.BooleanVar()
 LEAPMOTION = tk.BooleanVar()
+VIVE = tk.BooleanVar()
 
 # Add Label
 label = tk.Label(window, text="Polling Rate (Hz):")
-label.pack(side=tk.LEFT)
+label.grid(row=0, column=0)
 
 # Add Text Entry Field
 hz_field = tk.Entry(window)
-hz_field.pack(side=tk.LEFT)
+hz_field.grid(row=0, column=1)
 
 # Add Stopwatch Label
 stopwatch_label = tk.Label(window, text="00:00:00.000")
-stopwatch_label.pack()
+stopwatch_label.grid(row=0, column=3)
 
 # Add checkboxes
 polhemus_checkbox = tk.Checkbutton(window, text="Polhemus", variable=POLHEMUS)
-polhemus_checkbox.pack()
+polhemus_checkbox.grid(row=1, column=0, sticky="w")
 leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION)
-leapmotion_checkbox.pack()
+leapmotion_checkbox.grid(row=2, column=0, sticky="w")
+vive_checkbox = tk.Checkbutton(window, text="Vive", variable=VIVE)
+vive_checkbox.grid(row=3, column=0, sticky="w")
 
 # Tkinter comboboxw (dropdown)
 options = ["Desktop", "Head Mounted", "Screentop"]
 leapmotion_mode = ttk.Combobox(window, values=options, state="readonly")
 leapmotion_mode.set("Leapmotion mode...")
-leapmotion_mode.pack(side=tk.LEFT)
+leapmotion_mode.grid(row=2, column=1)
 
 def stop_output():
     global STARTED
@@ -120,15 +124,15 @@ def zip_files(files: list[str], zip_name: str):
 
 # Add Button 1
 button1 = tk.Button(window, text="Start", command=begin_tracking)
-button1.pack()
+button1.grid(row=1, column=3, sticky="se")
 
 # Add Button 2
 button2 = tk.Button(window, text="Stop", command=stop_output)
-button2.pack()
+button2.grid(row=2, column=3, sticky="se")
 
 # File picker
 file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
-file_picker_button.pack()
+file_picker_button.grid(row=3, column=3)
 
 # Start the main event loop
 if __name__ == "__main__":
