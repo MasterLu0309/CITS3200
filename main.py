@@ -36,19 +36,27 @@ hz_field.grid(row=0, column=1)
 stopwatch_label = tk.Label(window, text="00:00:00.000")
 stopwatch_label.grid(row=0, column=3)
 
+
+def toggle_leapmotion():
+    if LEAPMOTION.get():
+        leapmotion_mode.config(state="readonly")
+    else:
+        leapmotion_mode.config(state="disabled")
+
 # Add checkboxes
 polhemus_checkbox = tk.Checkbutton(window, text="Polhemus", variable=POLHEMUS)
 polhemus_checkbox.grid(row=1, column=0, sticky="w")
-leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION)
+leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION, command=toggle_leapmotion)
 leapmotion_checkbox.grid(row=2, column=0, sticky="w")
 vive_checkbox = tk.Checkbutton(window, text="Vive", variable=VIVE)
 vive_checkbox.grid(row=3, column=0, sticky="w")
 
 # Tkinter comboboxw (dropdown)
 options = ["Desktop", "Head Mounted", "Screentop"]
-leapmotion_mode = ttk.Combobox(window, values=options, state="readonly")
+leapmotion_mode = ttk.Combobox(window, values=options, state="disabled")
 leapmotion_mode.set("Leapmotion mode...")
 leapmotion_mode.grid(row=2, column=1)
+
 
 def stop_output():
     global STARTED
