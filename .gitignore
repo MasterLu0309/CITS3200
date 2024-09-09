@@ -137,3 +137,7 @@ cython_debug/
 # Misc.
 *.cheezelz
 test_output.csv
+leapc/*
+leapmotion_example.py
+leapmotion_output.csv
+polhemus_output.csv
