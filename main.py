@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk, messagebox
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
@@ -93,13 +93,18 @@ def start_output():
 
     pol.output_data(hz)
 
+def hz_messagebox():
+    messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
+
 def begin_tracking():
     # Test if the hz field is an integer
     try:
         _ = int(hz_field.get())
     except:
+        hz_messagebox()
         return
     if int(hz_field.get()) <= 0:
+        hz_messagebox()
         return
     else:
         if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
