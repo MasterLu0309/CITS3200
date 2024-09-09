@@ -94,24 +94,32 @@ def start_output():
     pol.output_data(hz)
 
 def begin_tracking():
-    if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
-        raise ValueError("Please select a valid mode for Leapmotion.")
-    global STARTED, start_time
-    if not STARTED:
-        STARTED = True
-        start_time = time.time()
-        stopwatch_label.config(text="00:00:00")
-        start_stopwatch()
-        if POLHEMUS.get():
-            polhemus_thread = threading.Thread(target=start_output, daemon=True)
-            polhemus_thread.start()
-        if LEAPMOTION.get():
-            leapm.another = True
-            leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
-            leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
-            leapmotion_thread.start()
+    # Test if the hz field is an integer
+    try:
+        _ = int(hz_field.get())
+    except:
+        return
+    if int(hz_field.get()) <= 0:
+        return
     else:
-        print("Already started.")
+        if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
+            raise ValueError("Please select a valid mode for Leapmotion.")
+        global STARTED, start_time
+        if not STARTED:
+            STARTED = True
+            start_time = time.time()
+            stopwatch_label.config(text="00:00:00")
+            start_stopwatch()
+            if POLHEMUS.get():
+                polhemus_thread = threading.Thread(target=start_output, daemon=True)
+                polhemus_thread.start()
+            if LEAPMOTION.get():
+                leapm.another = True
+                leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
+                leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
+                leapmotion_thread.start()
+        else:
+            print("Already started.")
 
 def open_file_picker():
     if not STARTED:
