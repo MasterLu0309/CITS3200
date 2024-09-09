@@ -3,7 +3,6 @@ from tkinter import filedialog, ttk
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
-import shutil
 import os
 import zipfile
 import time
@@ -43,6 +42,22 @@ def toggle_leapmotion():
     else:
         leapmotion_mode.config(state="disabled")
 
+def start_button_wrapper():
+    begin_tracking()
+    toggle_stop()
+
+def stop_button_wrapper():
+    stop_output()
+    toggle_stop()
+
+def toggle_stop():
+    if STARTED:
+        stop_button.config(state="normal")
+        start_button.config(state="disabled")
+    else:
+        stop_button.config(state="disabled")
+        start_button.config(state="normal")
+
 # Add checkboxes
 polhemus_checkbox = tk.Checkbutton(window, text="Polhemus", variable=POLHEMUS)
 polhemus_checkbox.grid(row=1, column=0, sticky="w")
@@ -51,12 +66,11 @@ leapmotion_checkbox.grid(row=2, column=0, sticky="w")
 vive_checkbox = tk.Checkbutton(window, text="Vive", variable=VIVE)
 vive_checkbox.grid(row=3, column=0, sticky="w")
 
-# Tkinter comboboxw (dropdown)
+# Tkinter combobox (dropdown)
 options = ["Desktop", "Head Mounted", "Screentop"]
 leapmotion_mode = ttk.Combobox(window, values=options, state="disabled")
 leapmotion_mode.set("Leapmotion mode...")
 leapmotion_mode.grid(row=2, column=1)
-
 
 def stop_output():
     global STARTED
@@ -131,12 +145,12 @@ def zip_files(files: list[str], zip_name: str):
 
 
 # Add Button 1
-button1 = tk.Button(window, text="Start", command=begin_tracking)
-button1.grid(row=1, column=3, sticky="ew")
+start_button = tk.Button(window, text="Start", command=start_button_wrapper)
+start_button.grid(row=1, column=3, sticky="ew")
 
 # Add Button 2
-button2 = tk.Button(window, text="Stop", command=stop_output)
-button2.grid(row=2, column=3, sticky="ew")
+stop_button = tk.Button(window, text="Stop", command=stop_button_wrapper, state="disabled")
+stop_button.grid(row=2, column=3, sticky="ew")
 
 # File picker
 file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
