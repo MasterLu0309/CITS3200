@@ -124,11 +124,11 @@ def zip_files(files: list[str], zip_name: str):
 
 # Add Button 1
 button1 = tk.Button(window, text="Start", command=begin_tracking)
-button1.grid(row=1, column=3, sticky="se")
+button1.grid(row=1, column=3, sticky="ew")
 
 # Add Button 2
 button2 = tk.Button(window, text="Stop", command=stop_output)
-button2.grid(row=2, column=3, sticky="se")
+button2.grid(row=2, column=3, sticky="ew")
 
 # File picker
 file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
