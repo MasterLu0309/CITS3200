@@ -1,9 +1,8 @@
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk, messagebox
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
-import shutil
 import os
 import zipfile
 import time
@@ -18,33 +17,61 @@ leapmotion_thread = None
 # Create the main window
 window = tk.Tk()
 window.title("Tracker Interface")
+window.resizable(False, False)
+#window.geometry("600x300")
 
 POLHEMUS = tk.BooleanVar()
 LEAPMOTION = tk.BooleanVar()
+VIVE = tk.BooleanVar()
 
 # Add Label
 label = tk.Label(window, text="Polling Rate (Hz):")
-label.pack(side=tk.LEFT)
+label.grid(row=0, column=0)
 
 # Add Text Entry Field
 hz_field = tk.Entry(window)
-hz_field.pack(side=tk.LEFT)
+hz_field.grid(row=0, column=1)
 
 # Add Stopwatch Label
 stopwatch_label = tk.Label(window, text="00:00:00.000")
-stopwatch_label.pack()
+stopwatch_label.grid(row=0, column=3)
+
+
+def toggle_leapmotion():
+    if LEAPMOTION.get():
+        leapmotion_mode.config(state="readonly")
+    else:
+        leapmotion_mode.config(state="disabled")
+
+def start_button_wrapper():
+    begin_tracking()
+    toggle_stop()
+
+def stop_button_wrapper():
+    stop_output()
+    toggle_stop()
+
+def toggle_stop():
+    if STARTED:
+        stop_button.config(state="normal")
+        start_button.config(state="disabled")
+    else:
+        stop_button.config(state="disabled")
+        start_button.config(state="normal")
 
 # Add checkboxes
 polhemus_checkbox = tk.Checkbutton(window, text="Polhemus", variable=POLHEMUS)
-polhemus_checkbox.pack()
-leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION)
-leapmotion_checkbox.pack()
+polhemus_checkbox.grid(row=1, column=0, sticky="w")
+leapmotion_checkbox = tk.Checkbutton(window, text="Leapmotion", variable=LEAPMOTION, command=toggle_leapmotion)
+leapmotion_checkbox.grid(row=2, column=0, sticky="w")
+vive_checkbox = tk.Checkbutton(window, text="Vive", variable=VIVE)
+vive_checkbox.grid(row=3, column=0, sticky="w")
 
-# Tkinter comboboxw (dropdown)
+# Tkinter combobox (dropdown)
 options = ["Desktop", "Head Mounted", "Screentop"]
-leapmotion_mode = ttk.Combobox(window, values=options, state="readonly")
+leapmotion_mode = ttk.Combobox(window, values=options, state="disabled")
 leapmotion_mode.set("Leapmotion mode...")
-leapmotion_mode.pack(side=tk.LEFT)
+leapmotion_mode.grid(row=2, column=1)
 
 def stop_output():
     global STARTED
@@ -67,25 +94,38 @@ def start_output():
 
     pol.output_data(hz)
 
+def hz_messagebox():
+    messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
+
 def begin_tracking():
-    if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
-        raise ValueError("Please select a valid mode for Leapmotion.")
-    global STARTED, start_time
-    if not STARTED:
-        STARTED = True
-        start_time = time.time()
-        stopwatch_label.config(text="00:00:00")
-        start_stopwatch()
-        if POLHEMUS.get():
-            polhemus_thread = threading.Thread(target=start_output, daemon=True)
-            polhemus_thread.start()
-        if LEAPMOTION.get():
-            leapm.another = True
-            leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
-            leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
-            leapmotion_thread.start()
+    # Test if the hz field is an integer
+    try:
+        _ = int(hz_field.get())
+    except:
+        hz_messagebox()
+        return
+    if int(hz_field.get()) <= 0:
+        hz_messagebox()
+        return
     else:
-        print("Already started.")
+        if LEAPMOTION.get() and (leapmotion_mode.get() not in ["Desktop", "Head Mounted", "Screentop"]):
+            raise ValueError("Please select a valid mode for Leapmotion.")
+        global STARTED, start_time
+        if not STARTED:
+            STARTED = True
+            start_time = time.time()
+            stopwatch_label.config(text="00:00:00")
+            start_stopwatch()
+            if POLHEMUS.get():
+                polhemus_thread = threading.Thread(target=start_output, daemon=True)
+                polhemus_thread.start()
+            if LEAPMOTION.get():
+                leapm.another = True
+                leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
+                leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
+                leapmotion_thread.start()
+        else:
+            print("Already started.")
 
 def open_file_picker():
     if not STARTED:
@@ -119,16 +159,16 @@ def zip_files(files: list[str], zip_name: str):
 
 
 # Add Button 1
-button1 = tk.Button(window, text="Start", command=begin_tracking)
-button1.pack()
+start_button = tk.Button(window, text="Start", command=start_button_wrapper)
+start_button.grid(row=1, column=3, sticky="ew")
 
 # Add Button 2
-button2 = tk.Button(window, text="Stop", command=stop_output)
-button2.pack()
+stop_button = tk.Button(window, text="Stop", command=stop_button_wrapper, state="disabled")
+stop_button.grid(row=2, column=3, sticky="ew")
 
 # File picker
 file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
-file_picker_button.pack()
+file_picker_button.grid(row=3, column=3)
 
 # Start the main event loop
 if __name__ == "__main__":
