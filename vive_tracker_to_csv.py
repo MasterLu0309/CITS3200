@@ -15,6 +15,7 @@ def get_tracker_data():
             if device_class == openvr.TrackedDeviceClass_TrackingReference:
                 tracker_pose = poses[i].mDeviceToAbsoluteTracking
                 flat_pose = [item for row in tracker_pose for item in row]
+                serial_number = openvr.VRSystem().getStringTrackedDeviceProperty(i, openvr.Prop_SerialNumber_String)
                 tracker_data.append([i] + flat_pose)  
     return tracker_data
 
