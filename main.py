@@ -17,6 +17,7 @@ leapmotion_thread = None
 # Create the main window
 window = tk.Tk()
 window.title("Tracker Interface")
+window.resizable(False, False)
 #window.geometry("600x300")
 
 POLHEMUS = tk.BooleanVar()
