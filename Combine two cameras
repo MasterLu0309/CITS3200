@@ -1,0 +1,29 @@
+import cv2
+
+import numpy as np
+
+capL = cv2.VideoCapture(0)
+capR = cv2.VideoCapture(1)
+
+if not (capL.isOpened() and capR.isOpened()):
+    print("Unable to access one of the cameras")
+    exit()
+
+while True:
+    retL, frameL = capL.read()
+    retR, frameR = capR.read()
+
+    if not (retL and retR):
+        print("Failed to capture images")
+        break
+
+    combined_frame = np.hstack((frameL, frameR))
+
+    cv2.imshow("Panoramic View", combined_frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+capL.release()
+capR.release()
+cv2.destroyAllWindows()

@@ -1,0 +1,28 @@
+import cv2
+
+captureL = cv2.VideoCapture(0)
+if not captureL.isOpened():
+    print("Problem on the left camera")
+
+captureR = cv2.VideoCapture(1)
+if not captureR.isOpened():
+    print("Problem on the right camera")
+
+while True:
+    retL, imageL = captureL.read()
+    retR, imageR = captureR.read()
+
+    if not retL or not retR:
+        print("Failed to capture image")
+        break
+
+    cv2.imshow("OriginalL", imageL)
+    cv2.imshow("OriginalR", imageR)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+captureL.release()
+captureR.release()
+cv2.destroyAllWindows()
