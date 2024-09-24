@@ -41,7 +41,7 @@ while True:
     # Finding outlines
     contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # large movements detected
+    # Large movements detected
     movement_detected = False
     for contour in contours:
         if cv2.contourArea(contour) < 1000: 
@@ -66,10 +66,15 @@ while True:
             out.release()
             out = None
 
-    # write to a file
+    # Display the real-time timestamp on the frame
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3] 
+    cv2.putText(frame, current_time, (frame.shape[1] - 400, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+
+    # Write the frame with the timestamp to the output file if recording
     if is_recording:
         out.write(frame)
 
+    # Show the video feed
     cv2.imshow('Camera Feed', frame)
     cv2.imshow('Frame Delta', frame_delta)
 
@@ -84,3 +89,4 @@ cap.release()
 if out is not None:
     out.release()
 cv2.destroyAllWindows()
+
