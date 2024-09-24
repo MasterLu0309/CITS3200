@@ -7,12 +7,17 @@
 - [*SteamVR*](https://store.steampowered.com/app/250820/SteamVR/)
 
 ## Install Instructions
-> *Ensure the above prerequisites are installed **before** proceeding.*
+> *Ensure the above [prerequisites](#prerequisites) are installed **before** proceeding.*
 1. Download this repository as a *zip* file.
     - Hit the green 'Code' button at the top of the page, then 'Download ZIP'.
 2. Extract the *zip* file to the desired directory.
 3. Double-click `initialise.bat` and wait while the environment is setup.
     - This process should only be completed **once** can take quite a while, but no user interaction is required, so feel free to walk away from the computer.
     - A message saying, `Initialisation complete. Run 'start.bat' to start the application` should be shown once the process is complete.
-4. Double-click `start.bat` to start the program
+4. Double-click `start.bat` to start the program.
     - This should be used each time you wish to start the program.
+
+### *"`start.bat` isn't working!"*
+> *If `start.bat` isn't working, please check the following.*
+- Ensure the listed [*prerequisites*](#prerequisites) are met.
+- Ensure no errors occurred during the running of `initialise.bat`.
