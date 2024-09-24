@@ -6,13 +6,16 @@ import os  # Ensure this import is present
 # Initialize OpenVR
 openvr.init(openvr.VRApplication_Scene)
 
-def get_device_name_and_type(device_index):
-    """Retrieve the name and type of the device."""
+def get_device_name_type_and_serial(device_index):
+    """Retrieve the name, type, and serial number of the device."""
     # Get the device class
     device_class = openvr.VRSystem().getTrackedDeviceClass(device_index)
 
     # Get the device model or name
     device_name = openvr.VRSystem().getStringTrackedDeviceProperty(device_index, openvr.Prop_ModelNumber_String)
+
+    # Get the device serial number
+    device_serial = openvr.VRSystem().getStringTrackedDeviceProperty(device_index, openvr.Prop_SerialNumber_String)
 
     # Determine device type
     if device_class == openvr.TrackedDeviceClass_HMD:
@@ -24,7 +27,7 @@ def get_device_name_and_type(device_index):
     else:
         device_type = "Unknown"
 
-    return device_name, device_type
+    return device_name, device_type, device_serial
 
 def get_tracker_data():
     """Get tracking data for all devices and categorize by type."""
@@ -35,13 +38,13 @@ def get_tracker_data():
 
     for i in range(len(poses)):
         if poses[i].bPoseIsValid:
-            # Get the name and type of the device
-            device_name, device_type = get_device_name_and_type(i)
+            # Get the name, type, and serial number of the device
+            device_name, device_type, device_serial = get_device_name_type_and_serial(i)
 
             # Get the pose data
             tracker_pose = poses[i].mDeviceToAbsoluteTracking
             flat_pose = [item for row in tracker_pose for item in row]
-            device_data[device_type].append([i, device_name] + flat_pose)
+            device_data[device_type].append([i, device_name, device_serial] + flat_pose)
 
     return device_data
 
@@ -56,7 +59,7 @@ def write_data_to_files(device_data):
                 csv_writer = csv.writer(csv_file)
                 # Write CSV header if the file is new
                 if os.path.getsize(file_name) == 0:
-                    header = ["Device ID", "Device Name", "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13", "M20", "M21", "M22", "M23"]
+                    header = ["Device ID", "Device Name", "Device Serial", "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13", "M20", "M21", "M22", "M23"]
                     csv_writer.writerow(header)
                 # Write data rows, one reading per line
                 csv_writer.writerows(data)
