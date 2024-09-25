@@ -1,8 +1,11 @@
 import steamvr
 
 # Initialize SteamVR
-steamvr.init()
-
+try:
+    steamvr.init()
+except Exception as e:
+    print(f"Failed to initialize SteamVR: {e}")
+    exit(1)  # Exit the program if initialization fails
 # Get the number of tracked devices
 num_devices = steamvr.get_device_count()
 
