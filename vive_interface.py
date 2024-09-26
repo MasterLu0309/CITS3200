@@ -22,6 +22,11 @@ for i in range(num_devices):
             if pose is not None:
                 position = pose.m[12:15]  # Extract position (x, y, z)
                  # Extract orientation rows from matrix
+                orientation = [
+                    pose.m[0:3],  # First row
+                    pose.m[4:7],  # Second row
+                    pose.m[8:11]  # Third row
+                ]
                 print(f"Tracker {i} position: {position}, orientation: {orientation}")
                 device_data.append({
                     'device_id': i,
@@ -30,5 +35,8 @@ for i in range(num_devices):
                 })
             else:
                 print(f"Tracker {i} pose data is not available.")
+        else:
+            print(f"Device {i} is not a tracker, it's a {device_type}.")
     except Exception as e:
         print(f"Error accessing device {i}: {e}")
+return device_data
