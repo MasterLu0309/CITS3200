@@ -107,5 +107,5 @@ run_command([os.path.join(venv_path, "Scripts", "pip"), 'install', './leapc/leap
 # Install the leapc-python-api package
 run_command([os.path.join(venv_path, "Scripts", "pip"), 'install', './leapc/leapc-python-api'], "Failed to install leapc-python-api package.")
 
-print("Initialisation complete. Run 'start.bat' to start the application.")
+print("Initialisation complete. Run 'start.py' to start the application.")
 input("Press Enter to continue...")
