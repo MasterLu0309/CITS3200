@@ -1,6 +1,6 @@
 # Installation
 ## Prerequisites
-- [*Python 3*](https://python.org/)
+- [*Python 3*](https://python.org/) (tested working with Python 3.11.8)
 - [*Ultraleap Gemini* hand tracking software](https://developer.leapmotion.com/tracking-software-download) (installed to it's default location)
     - *Ultraleap Tracking* service must be running
 - [*Polhemus Liberty* USB driver](https://ftp.polhemus1.com/pub/Trackers/Liberty/)
