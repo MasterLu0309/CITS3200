@@ -15,6 +15,7 @@ STARTED = False
 start_time = None
 polhemus_thread = None
 leapmotion_thread = None
+vive_thread = None
 
 # Create the main window
 window = tk.Tk()
@@ -82,6 +83,8 @@ def stop_output():
     if LEAPMOTION.get():
         leapm.another = False
         leapm.connection.disconnect()
+    if VIVE.get():
+        vive.another = False
     STARTED = False
 
 
@@ -126,6 +129,10 @@ def begin_tracking():
                 leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
                 leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
                 leapmotion_thread.start()
+            if VIVE.get():
+                vive.another = True
+                vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
+                vive_thread.start()
         else:
             print("Already started.")
 

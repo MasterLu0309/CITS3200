@@ -5,6 +5,8 @@ import os
 import pandas as pd  
 import scipy.io as sio  
 
+another = True
+
 # Initialize OpenVR
 try:
     openvr.init(openvr.VRApplication_Scene)
@@ -87,14 +89,21 @@ def write_data_to_files(device_data, export_format="csv"):
         except Exception as e:
             print(f"Error writing to file {file_name}: {e}")
 
-def record_for_preset_time(duration_seconds, export_format="csv"):
+def record_for_preset_time(duration_seconds, hz, export_format="csv"):
     """Record tracker data for a preset duration."""
     start_time = time.time()
     while time.time() - start_time < duration_seconds:
         device_data, completion_rate = get_tracker_data()
         write_data_to_files(device_data, export_format)
-        time.sleep(1)
+        time.sleep(1/hz)
     print("Recording completed.")
+
+def record_indefinitely(hz, export_format="csv"):
+    """Record tracker data indefinitely until interrupted."""
+    while another:
+        device_data, completion_rate = get_tracker_data()
+        write_data_to_files(device_data, export_format)
+        time.sleep(1/hz)
 
 def map_device_id_to_physical_tracker():
     """Map each device ID to a physical tracker for easier visualization."""
@@ -108,6 +117,10 @@ def map_device_id_to_physical_tracker():
         print(f"ID {device_id}: {device_type}, Name: {device_name}, Serial: {device_serial}")
     return device_mapping
 
+
+def start_vive(hz: int):
+    map_device_id_to_physical_tracker()
+    record_indefinitely(hz)
 
 if __name__ == "__main__":
     try:
