@@ -6,34 +6,43 @@ import pandas as pd
 import scipy.io as sio  
 
 # Initialize OpenVR
-openvr.init(openvr.VRApplication_Scene)
+try:
+    openvr.init(openvr.VRApplication_Scene)
+    vr_system = openvr.VRSystem()
+except Exception as e:
+    print(f"Failed to initialize OpenVR: {e}")
+    exit(1)
 
 def get_device_name_type_and_serial(device_index):
     """Retrieve the name, type, and serial number of the device."""
-    device_class = openvr.VRSystem().getTrackedDeviceClass(device_index)
+    try:
+        device_class = vr_system.getTrackedDeviceClass(device_index)
 
-    # Get the device model or name
-    device_name = openvr.VRSystem().getStringTrackedDeviceProperty(device_index, openvr.Prop_ModelNumber_String)
-    
-    # Get the device serial number
-    device_serial = openvr.VRSystem().getStringTrackedDeviceProperty(device_index, openvr.Prop_SerialNumber_String)
+        # Get the device model or name
+        device_name = vr_system.getStringTrackedDeviceProperty(device_index, openvr.Prop_ModelNumber_String)
+        
+        # Get the device serial number
+        device_serial = vr_system.getStringTrackedDeviceProperty(device_index, openvr.Prop_SerialNumber_String)
 
-    # Determine device type
-    if device_class == openvr.TrackedDeviceClass_HMD:
-        device_type = "Headset"
-    elif device_class == openvr.TrackedDeviceClass_Controller:
-        device_type = "Controller"
-    elif device_class == openvr.TrackedDeviceClass_TrackingReference:
-        device_type = "Tracker"
-    else:
-        device_type = "Unknown"
+        # Determine device type
+        if device_class == openvr.TrackedDeviceClass_HMD:
+            device_type = "Headset"
+        elif device_class == openvr.TrackedDeviceClass_Controller:
+            device_type = "Controller"
+        elif device_class == openvr.TrackedDeviceClass_TrackingReference:
+            device_type = "Tracker"
+        else:
+            device_type = "Unknown"
 
-    return device_name, device_type, device_serial
+        return device_name, device_type, device_serial
+    except Exception as e:
+        print(f"Error retrieving device info for index {device_index}: {e}")
+        return "Unknown", "Unknown", "Unknown"
 
 def get_tracker_data():
     """Get tracking data for all devices and categorize by type."""
     poses = (openvr.TrackedDevicePose_t * openvr.k_unMaxTrackedDeviceCount)()
-    openvr.VRSystem().getDeviceToAbsoluteTrackingPose(openvr.TrackingUniverseStanding, 0, poses)
+    vr_system.getDeviceToAbsoluteTrackingPose(openvr.TrackingUniverseStanding, 0, poses)
 
     device_data = {"Headset": [], "Controller": [], "Tracker": [], "Unknown": []}
     total_devices = 0
@@ -50,7 +59,7 @@ def get_tracker_data():
         else:
             print(f"Warning: Device {i} has invalid pose.")
 
-    completion_rate = (successful_reads / total_devices) * 100
+    completion_rate = (successful_reads / total_devices) * 100 if total_devices > 0 else 0
     print(f"Data completion rate: {completion_rate:.2f}%")
     
     return device_data, completion_rate
@@ -70,10 +79,16 @@ def write_data_to_files(device_data, export_format="csv"):
                         csv_writer.writerow(header)
                     csv_writer.writerows(data)
             elif export_format == "xlsx":
-                df = pd.DataFrame(data, columns=["Device ID", "Device Name", "Device Serial", 
-                                                  "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13",
-                                                  "M20", "M21", "M22", "M23"])
-                df.to_excel(file_name, index=False)
+                if os.path.exists(file_name):
+                    existing_data = pd.read_excel(file_name)
+                    new_data = pd.DataFrame(data, columns=existing_data.columns)
+                    combined_data = pd.concat([existing_data, new_data])
+                    combined_data.to_excel(file_name, index=False)
+                else:
+                    df = pd.DataFrame(data, columns=["Device ID", "Device Name", "Device Serial", 
+                                                      "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13",
+                                                      "M20", "M21", "M22", "M23"])
+                    df.to_excel(file_name, index=False)
             elif export_format == "txt":
                 with open(file_name, mode="a") as txt_file:
                     txt_file.write("\n".join(str(row) for row in data) + "\n")
@@ -97,7 +112,7 @@ def map_device_id_to_physical_tracker():
     """Map each device ID to a physical tracker for easier visualization."""
     device_mapping = {}
     for i in range(openvr.k_unMaxTrackedDeviceCount):
-        if openvr.VRSystem().isTrackedDeviceConnected(i):
+        if vr_system.isTrackedDeviceConnected(i):
             device_name, device_type, device_serial = get_device_name_type_and_serial(i)
             device_mapping[i] = (device_type, device_name, device_serial)
     print("Device Mapping:")
