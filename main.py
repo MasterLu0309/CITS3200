@@ -85,6 +85,7 @@ def stop_output():
         leapm.connection.disconnect()
     if VIVE.get():
         vive.another = False
+        vive.files = []
     STARTED = False
 
 
@@ -140,7 +141,7 @@ def open_file_picker():
     if not STARTED:
         file_path = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP Files", "*.zip")])
         print(file_path)
-        zip_files(["polhemus_output.csv", "leapmotion_output.csv"], file_path)
+        zip_files(["polhemus_output.csv", "leapmotion_output.csv"] + vive.files, file_path)
     else:
         print("Cannot save file while tracking.")
 

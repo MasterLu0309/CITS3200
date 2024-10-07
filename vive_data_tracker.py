@@ -6,6 +6,7 @@ import pandas as pd
 import scipy.io as sio  
 
 another = True
+files = []
 
 # Initialize OpenVR
 try:
@@ -64,6 +65,7 @@ def write_data_to_files(device_data, export_format="csv"):
     """Append data to separate files based on device type and export format."""
     for device_type, data in device_data.items():
         file_name = f"{device_type.lower()}_data.{export_format}"
+        files.append(file_name)
 
         try:
             if export_format == "csv":
