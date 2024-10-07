@@ -3,9 +3,11 @@ from tkinter import filedialog, ttk, messagebox
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
+import vive_data_tracker as vive
 import os
 import zipfile
 import time
+import re
 
 
 STARTED = False
@@ -178,6 +180,13 @@ if __name__ == "__main__":
         pass
     try:
         os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*_data\..*')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
     except:
         pass
     pol.initialise_polhemus(1)
