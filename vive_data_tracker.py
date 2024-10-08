@@ -62,34 +62,36 @@ def get_tracker_data():
     return device_data, completion_rate
 
 def write_data_to_files(device_data, export_format="csv"):
-    """Append data to separate files based on device type and export format."""
-    for device_type, data in device_data.items():
-        file_name = f"{device_type.lower()}_data.{export_format}"
-        files.append(file_name)
+    """Append data to separate files based on individual devices and export format."""
+    for device_type, devices in device_data.items():
+        for device in devices:
+            device_id, device_name, device_serial, *pose_data = device
+            file_name = f"{device_type.lower()}_{device_serial}_data.{export_format}"
+            files.append(file_name)
 
-        try:
-            if export_format == "csv":
-                with open(file_name, mode="a", newline="") as csv_file:
-                    csv_writer = csv.writer(csv_file)
-                    if os.path.getsize(file_name) == 0:
-                        header = ["Device ID", "Device Name", "Device Serial", "M00", "M01", "M02", "M03", 
-                                  "M10", "M11", "M12", "M13", "M20", "M21", "M22", "M23"]
-                        csv_writer.writerow(header)
-                    csv_writer.writerows(data)
-            elif export_format == "xlsx":
-                df = pd.DataFrame(data, columns=["Device ID", "Device Name", "Device Serial", 
-                                                  "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13",
-                                                  "M20", "M21", "M22", "M23"])
-                df.to_excel(file_name, index=False)
-            elif export_format == "txt":
-                with open(file_name, mode="a") as txt_file:
-                    txt_file.write("\n".join(str(row) for row in data) + "\n")
-            elif export_format == "mat":
-                sio.savemat(file_name, {device_type.lower(): data})
-            else:
-                raise ValueError(f"Unsupported export format: {export_format}")
-        except Exception as e:
-            print(f"Error writing to file {file_name}: {e}")
+            try:
+                if export_format == "csv":
+                    with open(file_name, mode="a", newline="") as csv_file:
+                        csv_writer = csv.writer(csv_file)
+                        if os.path.getsize(file_name) == 0:
+                            header = ["Device ID", "Device Name", "Device Serial", "M00", "M01", "M02", "M03", 
+                                      "M10", "M11", "M12", "M13", "M20", "M21", "M22", "M23"]
+                            csv_writer.writerow(header)
+                        csv_writer.writerow([device_id, device_name, device_serial] + pose_data)
+                elif export_format == "xlsx":
+                    df = pd.DataFrame([device], columns=["Device ID", "Device Name", "Device Serial", 
+                                                         "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13",
+                                                         "M20", "M21", "M22", "M23"])
+                    df.to_excel(file_name, index=False)
+                elif export_format == "txt":
+                    with open(file_name, mode="a") as txt_file:
+                        txt_file.write(str(device) + "\n")
+                elif export_format == "mat":
+                    sio.savemat(file_name, {f"{device_type.lower()}_{device_serial}": device})
+                else:
+                    raise ValueError(f"Unsupported export format: {export_format}")
+            except Exception as e:
+                print(f"Error writing to file {file_name}: {e}")
 
 def record_for_preset_time(duration_seconds, hz, export_format="csv"):
     """Record tracker data for a preset duration."""
@@ -121,6 +123,7 @@ def map_device_id_to_physical_tracker():
 
 
 def start_vive(hz: int):
+    files = []
     map_device_id_to_physical_tracker()
     record_indefinitely(hz)
 

@@ -85,7 +85,6 @@ def stop_output():
         leapm.connection.disconnect()
     if VIVE.get():
         vive.another = False
-        vive.files = []
     STARTED = False
 
 
