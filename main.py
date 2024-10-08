@@ -8,7 +8,7 @@ import os
 import zipfile
 import time
 import re
-
+import psutil
 
 STARTED = False
 
@@ -39,9 +39,20 @@ hz_field.grid(row=0, column=1)
 stopwatch_label = tk.Label(window, text="00:00:00.000")
 stopwatch_label.grid(row=0, column=3)
 
+def check_leapmotion_service():
+    try:
+        service = psutil.win_service_get("UltraleapTracking")
+        status = service.status()
+        return status == "running"
+    except:
+        return False
 
 def toggle_leapmotion():
     if LEAPMOTION.get():
+        if not check_leapmotion_service():
+            messagebox.showerror("Ultraleap Service Error", "Please ensure the Ultraleap Tracking service is running.", parent=window)
+            LEAPMOTION.set(False)
+            return
         leapmotion_mode.config(state="readonly")
     else:
         leapmotion_mode.config(state="disabled")
