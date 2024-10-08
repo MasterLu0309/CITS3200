@@ -147,7 +147,9 @@ def open_file_picker():
     if not STARTED:
         file_path = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP Files", "*.zip")])
         print(file_path)
-        zip_files(["polhemus_output.csv", "leapmotion_output.csv"].extend(vive.files), file_path)
+        file_list = ["polhemus_output.csv", "leapmotion_output.csv"]
+        file_list.extend(vive.files)
+        zip_files(file_list, file_path)
     else:
         print("Cannot save file while tracking.")
 
