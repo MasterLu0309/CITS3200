@@ -8,12 +8,6 @@ import scipy.io as sio
 another = True
 files = []
 
-# Initialize OpenVR
-try:
-    openvr.init(openvr.VRApplication_Scene)
-except:
-    print("Error: Could not initialize OpenVR. Please ensure SteamVR is running and a headset is connected.")
-
 def get_device_name_type_and_serial(device_index):
     """Retrieve the name, type, and serial number of the device."""
     device_class = openvr.VRSystem().getTrackedDeviceClass(device_index)

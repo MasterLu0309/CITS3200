@@ -101,7 +101,6 @@ def start_output():
 
 def hz_messagebox():
     messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
-
 def begin_tracking():
     # Test if the hz field is an integer
     try:
@@ -130,9 +129,17 @@ def begin_tracking():
                 leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
                 leapmotion_thread.start()
             if VIVE.get():
-                vive.another = True
-                vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
-                vive_thread.start()
+                # Initialize OpenVR
+                try:
+                    vive.openvr.init(vive.openvr.VRApplication_Scene)
+                    vive.another = True
+                    vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
+                    vive_thread.start()
+                except:
+                    stop_button_wrapper()
+                    messagebox.showerror("Could not initialize OpenVR", "Please ensure SteamVR is running and a headset is connected.", parent=window)
+                    print("Error: Could not initialize OpenVR. Please ensure SteamVR is running and a headset is connected.")
+
         else:
             print("Already started.")
 
