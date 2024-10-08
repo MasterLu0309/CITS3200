@@ -68,10 +68,10 @@ def write_data_to_files(device_data, export_format="csv"):
                     with open(file_name, mode="a", newline="") as csv_file:
                         csv_writer = csv.writer(csv_file)
                         if os.path.getsize(file_name) == 0:
-                            header = ["Device ID", "Device Name", "Device Serial", "M00", "M01", "M02", "M03", 
+                            header = ["Timestamp","Device ID", "Device Name", "Device Serial", "M00", "M01", "M02", "M03", 
                                       "M10", "M11", "M12", "M13", "M20", "M21", "M22", "M23"]
                             csv_writer.writerow(header)
-                        csv_writer.writerow([device_id, device_name, device_serial] + pose_data)
+                        csv_writer.writerow([time.time()] + [device_id, device_name, device_serial] + pose_data)
                 elif export_format == "xlsx":
                     df = pd.DataFrame([device], columns=["Device ID", "Device Name", "Device Serial", 
                                                          "M00", "M01", "M02", "M03", "M10", "M11", "M12", "M13",
