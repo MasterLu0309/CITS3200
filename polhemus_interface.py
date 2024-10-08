@@ -1,11 +1,13 @@
 import polhemus
 import time
+import threading
 
 # Requires Polhemus Liberty USB driver to be installed for communication
 # https://ftp.polhemus1.com/pub/Trackers/Liberty/
 # WARNING: Above driver is NOT COMPATIBLE with Windows 11's 'Core Isolation' security feature.
 
 another = False
+stop_event = threading.Event()
 
 def initialise_polhemus(amount: int) -> list:
     """
@@ -81,7 +83,7 @@ def output_data(hz: int):
     trackers = initialise_polhemus(1)
     with open("polhemus_output.csv", "w") as file:
         file.write("Timestamp,PositionX1,PositionY1,PositionZ1,AngleX1,AngleY1,AngleZ1,PositionX2,PositionY2,PositionZ2,AngleX2,AngleY2,AngleZ2,StylusButton,Sensor1,Sensor2\n")
-        while another:
+        while another and not stop_event.is_set():
             data = get_polhemus_data(trackers, False)
             current_data = f"{data[0]['Timestamp']},{data[0]['PositionX1']},{data[0]['PositionY1']},{data[0]['PositionZ1']},{data[0]['AngleX1']},{data[0]['AngleY1']},{data[0]['AngleZ1']},{data[0]['PositionX2']},{data[0]['PositionY2']},{data[0]['PositionZ2']},{data[0]['AngleX2']},{data[0]['AngleY2']},{data[0]['AngleZ2']},0,0,0"
             print(current_data)

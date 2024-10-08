@@ -91,6 +91,9 @@ def stop_output():
     global STARTED
     if POLHEMUS.get():
         pol.another = False
+        pol.stop_event.set()
+        if polhemus_thread is not None:
+            polhemus_thread.join()  # Wait for the thread to finish
     if LEAPMOTION.get():
         leapm.another = False
         leapm.connection.disconnect()
@@ -112,6 +115,7 @@ def start_output():
 
 def hz_messagebox():
     messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
+
 def begin_tracking():
     # Test if the hz field is an integer
     try:
@@ -132,6 +136,7 @@ def begin_tracking():
             stopwatch_label.config(text="00:00:00")
             start_stopwatch()
             if POLHEMUS.get():
+                pol.stop_event.clear()
                 polhemus_thread = threading.Thread(target=start_output, daemon=True)
                 polhemus_thread.start()
             if LEAPMOTION.get():
@@ -147,6 +152,7 @@ def begin_tracking():
                     vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
                     vive_thread.start()
                 except:
+                    stop_output()
                     stop_button_wrapper()
                     messagebox.showerror("Could not initialize OpenVR", "Please ensure SteamVR is running and a headset is connected.", parent=window)
                     print("Error: Could not initialize OpenVR. Please ensure SteamVR is running and a headset is connected.")
