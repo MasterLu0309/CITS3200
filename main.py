@@ -3,17 +3,19 @@ from tkinter import filedialog, ttk, messagebox
 import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
+import vive_data_tracker as vive
 import os
 import zipfile
 import time
+import re
 import psutil
-
 
 STARTED = False
 
 start_time = None
 polhemus_thread = None
 leapmotion_thread = None
+vive_thread = None
 
 # Create the main window
 window = tk.Tk()
@@ -92,6 +94,8 @@ def stop_output():
     if LEAPMOTION.get():
         leapm.another = False
         leapm.connection.disconnect()
+    if VIVE.get():
+        vive.another = False
     STARTED = False
 
 
@@ -108,7 +112,6 @@ def start_output():
 
 def hz_messagebox():
     messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
-
 def begin_tracking():
     # Test if the hz field is an integer
     try:
@@ -136,6 +139,18 @@ def begin_tracking():
                 leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
                 leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
                 leapmotion_thread.start()
+            if VIVE.get():
+                # Initialize OpenVR
+                try:
+                    vive.openvr.init(vive.openvr.VRApplication_Scene)
+                    vive.another = True
+                    vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
+                    vive_thread.start()
+                except:
+                    stop_button_wrapper()
+                    messagebox.showerror("Could not initialize OpenVR", "Please ensure SteamVR is running and a headset is connected.", parent=window)
+                    print("Error: Could not initialize OpenVR. Please ensure SteamVR is running and a headset is connected.")
+
         else:
             print("Already started.")
 
@@ -143,7 +158,9 @@ def open_file_picker():
     if not STARTED:
         file_path = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP Files", "*.zip")])
         print(file_path)
-        zip_files(["polhemus_output.csv", "leapmotion_output.csv"], file_path)
+        file_list = ["polhemus_output.csv", "leapmotion_output.csv"]
+        file_list.extend(vive.files)
+        zip_files(file_list, file_path)
     else:
         print("Cannot save file while tracking.")
 
@@ -190,6 +207,13 @@ if __name__ == "__main__":
         pass
     try:
         os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*_data\..*')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
     except:
         pass
     pol.initialise_polhemus(1)
