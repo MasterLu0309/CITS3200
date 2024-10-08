@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.io as sio  
 
 another = True
-files = []
+files = set()
 
 def get_device_name_type_and_serial(device_index):
     """Retrieve the name, type, and serial number of the device."""
@@ -61,7 +61,7 @@ def write_data_to_files(device_data, export_format="csv"):
         for device in devices:
             device_id, device_name, device_serial, *pose_data = device
             file_name = f"{device_type.lower()}_{device_serial}_data.{export_format}"
-            files.append(file_name)
+            files.add(file_name)
 
             try:
                 if export_format == "csv":
@@ -117,7 +117,7 @@ def map_device_id_to_physical_tracker():
 
 
 def start_vive(hz: int):
-    files = []
+    files = set()
     map_device_id_to_physical_tracker()
     record_indefinitely(hz)
 
