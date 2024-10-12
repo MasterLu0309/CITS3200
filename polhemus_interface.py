@@ -6,6 +6,16 @@ import threading
 # https://ftp.polhemus1.com/pub/Trackers/Liberty/
 # WARNING: Above driver is NOT COMPATIBLE with Windows 11's 'Core Isolation' security feature.
 
+# ORDER OF OPERATIONS:
+# 1. Initialise the Polhemus tracker(s) with 'initialise_polhemus(amount: int)'
+# 2. Each "poll", read data from tracker using 'get_polhemus_data(tracker_list: list, stylus: bool)'
+# 3. Use data as needed
+# 4. Close the tracker(s) when finished with 'close_trackers(tracker_list: list)'
+
+
+# Global variable to stop the polling and output of Polhemus data,
+# setting this at any time to False will stop output. Must be set to
+# True for output to occur.
 another = False
 stop_event = threading.Event()
 
@@ -27,8 +37,10 @@ def get_polhemus_data(tracker_list: list, stylus: bool) -> list[dict]:
     tracker_amount = len(tracker_list)
     data = [None]*tracker_amount
     for i in range(tracker_amount):
-        tracker_list[i].Run() # This method seems to not initialise the tracker, but rather read in the data from it.
+        tracker_list[i].Run() # This method seems to not "start" the tracker, but rather read in the data from it.
         timestamp = time.time()
+        # Different data dictionaries are included on whether a stylus is being used or not.
+        # NOT implemented in UI yet, defaults to NO STYLUS.
         if stylus:
             data[i] = {
                 "Timestamp": timestamp,
@@ -73,6 +85,7 @@ def close_trackers(tracker_list: list):
     """
     Closes provided list of tracker objects.
     """
+    # Each tracker object must be individually closed.
     for i in range(len(tracker_list)):
         tracker_list[i].Close()
 
