@@ -1,17 +1,52 @@
 import cv2
 import datetime
+import subprocess
+import re
 
 cap = None
 out = None
 is_recording = False
 
-def initialize_camera():
+def list_cameras():
+    """List all detected cameras on macOS."""
+    try:
+        # Run the system_profiler command to list available cameras
+        result = subprocess.run(["system_profiler", "SPCameraDataType"], capture_output=True, text=True)
+        cameras = result.stdout
+        
+        # Check if any cameras are detected
+        if "No video devices were found." in cameras:
+            print("No cameras detected.")
+            return None
+
+        # Parse the output to list camera names and assign indices
+        camera_list = []
+        camera_pattern = re.compile(r"(\w+ \w+ Camera.*):")  # Regex pattern to match camera names
+        
+        for match in camera_pattern.findall(cameras):
+            camera_list.append(match)
+        
+        # Display detected cameras with indices
+        if camera_list:
+            print("Detected Cameras:")
+            for i, camera in enumerate(camera_list):
+                print(f"[{i}] {camera}")
+            return camera_list
+        else:
+            print("No cameras found.")
+            return None
+        
+    except Exception as e:
+        print(f"Error while listing cameras: {e}")
+        return None
+
+def initialize_camera(camera_index):
     """Initialize the camera and check if it's opened successfully."""
     global cap
-    cap = cv2.VideoCapture(0)  # Open the default camera (0)
+    cap = cv2.VideoCapture(camera_index)  # Open the selected camera
 
     if not cap.isOpened():
-        print("Error: Could not open camera")
+        print(f"Error: Could not open camera {camera_index}")
         return False  
     return True  
 
@@ -80,8 +115,25 @@ def process_frame():
 
 def start_camera():
     """Start the camera and begin processing frames with the system's default settings."""
-    if not initialize_camera():
+    cameras = list_cameras()
+
+    if not cameras:
+        print("No cameras available to select.")
         return
+
+    # Ask the user to input a camera index (0, 1, etc.)
+    try:
+        camera_index = int(input(f"Select a camera index (0-{len(cameras) - 1}): "))
+        if camera_index < 0 or camera_index >= len(cameras):
+            print(f"Invalid index, using default camera 0.")
+            camera_index = 0
+    except ValueError:
+        print("Invalid input. Using default camera index 0.")
+        camera_index = 0
+
+    if not initialize_camera(camera_index):
+        return
+
     process_frame()
 
 def stop_camera():
