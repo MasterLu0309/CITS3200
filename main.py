@@ -172,6 +172,7 @@ def begin_tracking():
                     vive.another = True
                     vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
                     vive_thread.start()
+                # Since VR is the last to be initialised, sending the stop button signal if failed will stop all other threads too
                 except:
                     stop_output()
                     stop_button_wrapper()
