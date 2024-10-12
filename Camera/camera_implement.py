@@ -1,87 +1,99 @@
-# Uncomment the following lines to install the required packages if you haven't already.
-# pip install opencv-python
-# pip install opencv-contrib-python
+import cv2
+import datetime
 
-import cv2  # Import OpenCV library for computer vision tasks
-import datetime  # Import datetime module to work with timestamps
-import time  # Import time module to manage timing
-
-# Start capturing video from the default camera (0)
-cap = cv2.VideoCapture(0)
-
-# Define the codec for the video writer
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out = None  # Initialize video writer variable
-
-# Flag to indicate if recording is in progress
+cap = None
+out = None
 is_recording = False
 
-# Set polling rate for 10 FPS (0.1 seconds per frame)
-polling_rate = 0.1  
-last_poll_time = time.time()  
+def initialize_camera():
+    """Initialize the camera and check if it's opened successfully."""
+    global cap
+    cap = cv2.VideoCapture(0)  # Open the default camera (0)
 
-# Check if the camera opened successfully
-if not cap.isOpened():
-    print("Error: Could not open camera")  # Print error message if camera fails to open
-    exit()  # Exit the program
+    if not cap.isOpened():
+        print("Error: Could not open camera")
+        return False  
+    return True  
 
-# Main loop for processing video frames
-while True:
-    current_time = time.time()  # Get the current time
+def start_recording():
+    """Start recording to a video file using the camera's default FPS and resolution."""
+    global out, is_recording
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"output_{timestamp}.mov"  
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    # Check if enough time has passed since the last frame was captured
-    if current_time - last_poll_time >= polling_rate:
-        ret, frame = cap.read()  
+    # Get the system's default FPS and resolution
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if fps == 0:  # If camera doesn't return FPS, use a fallback
+        print("failsafe reached")
+        fps = 30.0
+
+    # Get the default resolution
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Create VideoWriter object with the default FPS and resolution
+    out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
+    is_recording = True  
+    print(f"Recording started at {fps} FPS with resolution {width}x{height}: {filename}")
+
+def stop_recording():
+    """Stop recording and release the video writer."""
+    global out, is_recording
+    if is_recording:
+        out.release()  
+        print("Recording stopped")  
+    is_recording = False  
+
+def process_frame():
+    """Process video frames from the camera."""
+    global out, is_recording, exit_flag
+
+    while True:
+        ret, frame = cap.read()
         if not ret:
-            print("Error: Could not read frame")  # Print error if the frame is not read
-            break  # Exit the loop
+            print("Error: Could not read frame")
+            break  
 
         # Display the real-time timestamp on the video frame
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        cv2.putText(frame, timestamp, (frame.shape[1] - 400, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        cv2.putText(frame, timestamp, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
         # Display the video feed in a window
         cv2.imshow('Camera Feed', frame)
 
-        # Check for user input to start or stop recording
-        key = cv2.waitKey(1) & 0xFF 
-
-        # Start recording if 'r' is pressed
-        if key == ord('r') and not is_recording:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"output_{timestamp}.mov"  
-            print(f"Recording started: {filename}")  
-            out = cv2.VideoWriter(filename, fourcc, 20.0, (frame.shape[1], frame.shape[0])) 
-            is_recording = True  
-        
-        # Stop recording if 's' is pressed
-        elif key == ord('s') and is_recording:
-            print("Recording stopped")  
-            is_recording = False 
-            out.release() 
-            out = None  
-        
-        # Write the current frame to the output file if recording
+        # Write to file if recording
         if is_recording:
             out.write(frame)
 
-      
+        # Check for key press events to start/stop recording or exit
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('r') and not is_recording:
+            start_recording()
+        elif key == ord('s') and is_recording:
+            stop_recording()
+        elif key == ord('q'):
+            print("Exit")
+            break  
 
-        # Update the last poll time to the current time
-        last_poll_time = current_time  
+    stop_recording()
 
-        #checking how long code process took
-        elapsed_time = time.time() - current_time
-        print(f"Elapsed time for frame processing: {elapsed_time:.4f} seconds")  # Print elapsed time
+def start_camera():
+    """Start the camera and begin processing frames with the system's default settings."""
+    if not initialize_camera():
+        return
+    process_frame()
 
-    # Press 'q' to exit the loop
-    key = cv2.waitKey(1) & 0xFF  
-    if key == ord('q'):
-        print("Exit") 
-        break  
+def stop_camera():
+    """Clean up resources after stopping the camera."""
+    global cap
+    if cap is not None:
+        cap.release()
+    cv2.destroyAllWindows()
 
-# Clean up resources after exiting the loop
-cap.release()  # Release the camera resource
-if out is not None:
-    out.release()  # Release the video writer if it exists
-cv2.destroyAllWindows()  # Close all OpenCV windows
+# Example usage
+if __name__ == "__main__":
+    try:
+        start_camera()
+    finally:
+        stop_camera()
