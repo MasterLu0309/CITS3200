@@ -106,7 +106,7 @@ def initialise_leapmotion(hz: int):
                         "w": hand.arm.rotation.w
                     }
                 if another:
-                    #print(hand_data)
+                    print(hand_data)
                     file.write(f'{time.time()},')
                     if my_listener.is_hand():
                         try:
