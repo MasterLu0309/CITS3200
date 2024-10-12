@@ -1,3 +1,4 @@
+https://github.com/MasterLu0309/CITS3200
 # Installation
 ## Prerequisites
 - [*Python 3*](https://python.org/) (tested working with Python 3.11.8)
@@ -28,3 +29,35 @@
 > *If `start.py` isn't working, please check the following.*
 - Ensure the listed [*prerequisites*](#prerequisites) are met.
 - Ensure no errors occurred during the running of `initialise.py`.
+- Ensure you are running it using Python.
+
+# Usage
+## Data Interpretation
+For all tracker types, each row of output is a single "poll", each poll is labeled with its Unix timestamp (seconds since *00:00:00 UTC on 1 January 1970*).
+### Polhemus
+- Output file contains tracking information for **two** tracking nodes.
+    - `x`, `y`, and `z` for each node
+    - Pitch, roll, and yaw for each node
+- Output also contains tracking data for stylus accessory (`0` if not present).
+
+### Ultraleap Leapmotion 2
+> **WARNING**: *These files contains a **lot** of data!*
+- Output file contains tracking information for **two** hands (left + right).
+    - *Each hand* has a palm, arm, and *five digits* (thumb, index, middle, ring, and pinky)
+    - *Each digit* has *four bones* (metacarpal, proximal, intermediate, distal)
+    - *Each bone* has a width, x-position, y-position, z-position, and rotation (w)
+- Thus each "poll" has ***217 columns*** of output (including the timestamp).
+
+### Virtual Reality
+- Each output file corresponds to a single tracker picked up by *OpenVR*/*SteamVR*.
+- Each poll for each tracker contains the information from a 3x4 transformation matrix used to represent the pose of the corresponding device (see matrix below).
+    - `M00`, `M01`, `M02`: Rotation component for the x-axis,
+    - `M10`, `M11`, `M12`: Rotation component for the y-axis,
+    - `M20`, `M21`, `M22`: Rotation component for the z-axis,
+    - `M03`, `M13`, `M23`: Translation (position) component for the x, y, and z directions
+- The output essentially contains a "flattened" matrix for each poll.
+```
+| M00 M01 M02 M03 |
+| M10 M11 M12 M13 |
+| M20 M21 M22 M23 |
+```
