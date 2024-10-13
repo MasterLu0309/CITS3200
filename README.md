@@ -32,6 +32,15 @@ https://github.com/MasterLu0309/CITS3200
 - Ensure you are running it using Python.
 
 # Usage
+## User Guide
+1. Run `start.py` with Python to launch the program.
+2. Select the tracker checkboxes you intend to use.
+3. Enter the polling rate (in Hz) that data should be tracked at.
+4. Press `Start` to begin tracking (this may take a moment to begin on slower systems).
+5. When ready, press `Stop` to halt tracking.
+6. Press `Save zip to...` to select a location for the zip file containing all the tracked data to be saved.
+   - Ensure you do this before doing another tracking run, files may be overwritten otherwise!
+
 ## Data Interpretation
 For all tracker types, each row of output is a single "poll", each poll is labeled with its Unix timestamp (seconds since *00:00:00 UTC on 1 January 1970*).
 ### Polhemus
@@ -41,7 +50,7 @@ For all tracker types, each row of output is a single "poll", each poll is label
 - Output also contains tracking data for stylus accessory (`0` if not present).
 
 ### Ultraleap Leapmotion 2
-> **WARNING**: *These files contains a **lot** of data!*
+> **WARNING**: *These files contain a **lot** of data!*
 - Output file contains tracking information for **two** hands (left + right).
     - *Each hand* has a palm, arm, and *five digits* (thumb, index, middle, ring, and pinky)
     - *Each digit* has *four bones* (metacarpal, proximal, intermediate, distal)
