@@ -21,7 +21,7 @@ def list_cameras():
 
         # Parse the output to list camera names and assign indices
         camera_list = []
-        camera_pattern = re.compile(r"(\w+ \w+ Camera.*):")  # Regex pattern to match camera names
+        camera_pattern = re.compile(r"(.+(?:Camera|Webcam)):", re.IGNORECASE) # Regex pattern to match camera names
         
         for match in camera_pattern.findall(cameras):
             camera_list.append(match)
