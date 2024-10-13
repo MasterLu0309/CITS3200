@@ -68,6 +68,21 @@ def toggle_leapmotion():
 
 # Underlying functions for start and stop buttons
 def start_button_wrapper():
+    try:
+        os.remove("polhemus_output.csv")
+    except:
+        pass
+    try:
+        os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*_data\..*')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
+    except:
+        pass
     begin_tracking()
     toggle_stop()
 
