@@ -1,184 +1,183 @@
-import cv2
-import datetime
+import tkinter as tk
+from tkinter import filedialog, ttk, messagebox
+import threading
+import os
+import re
+import camera_gui_library as camera  # Import the camera module
+import tkinter as tk
+from tkinter import filedialog, ttk, messagebox
+import threading
+#import polhemus_interface as pol
+#import leapmotion_interface as leapm
+#import vive_data_tracker as vive
+import zipfile
 import time
+#import psutil
 
-cap = None
-out = None
-is_recording = False
 
-def initialize_camera(camera_index):
-    """Initialize the camera and check if it's opened successfully."""
-    global cap
-    cap = cv2.VideoCapture(camera_index)  # Open the selected camera
+# Global variables for tracker and camera processes
+STARTED = False
+start_time = None
+polhemus_thread = None
+leapmotion_thread = None
+vive_thread = None
+selected_camera_index = None
 
-    if not cap.isOpened():
-        print(f"Error: Could not open camera {camera_index}")
-        return False  
-    return True  
+# Create the main window
+window = tk.Tk()
+window.title("Tracker and Camera Interface")
+window.resizable(False, False)
 
-def start_recording():
-    """Start recording to a video file using the camera's default FPS and resolution."""
-    global out, is_recording
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"output_{timestamp}.mov"  
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+# Variables for tracker checkboxes
+POLHEMUS = tk.BooleanVar()
+LEAPMOTION = tk.BooleanVar()
+VIVE = tk.BooleanVar()
 
-    # Get the system's default FPS and resolution
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    if fps == 0:  # If camera doesn't return FPS, use a fallback
-        print("Failsafe reached")
-        fps = 30.0
+# Polling rate input
+label = tk.Label(window, text="Polling Rate (Hz):")
+label.grid(row=0, column=0)
+hz_field = tk.Entry(window)
+hz_field.grid(row=0, column=1)
 
-    # Get the default resolution
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+# Stopwatch
+stopwatch_label = tk.Label(window, text="00:00:00.000")
+stopwatch_label.grid(row=0, column=3)
 
-    # Create VideoWriter object with the default FPS and resolution
-    out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
-    is_recording = True  
-    print(f"Recording started at {fps} FPS with resolution {width}x{height}: {filename}")
+# Dropdown for camera selection
+camera_var = tk.StringVar(value="Select a camera")
+camera_dropdown = ttk.Combobox(window, textvariable=camera_var, values=[], state="readonly")
+camera_dropdown.grid(row=4, column=0)
 
-def stop_recording():
-    """Stop recording and release the video writer."""
-    global out, is_recording
-    if is_recording:
-        out.release()  
-        print("Recording stopped")  
-    is_recording = False  
+# Button for camera preview
+preview_button = tk.Button(window, text="Preview Camera", command=lambda: camera.preview_camera(selected_camera_index))
+preview_button.grid(row=4, column=1)
 
-def process_frame():
-    """Process video frames from the camera."""
-    global out, is_recording
+def start_button_wrapper():
+    try:
+        os.remove("polhemus_output.csv")
+    except:
+        pass
+    try:
+        os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*_data\..*')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
+    except:
+        pass
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Error: Could not read frame")
-            break  
+    # Check if a valid polling rate is entered
+    try:
+        hz = int(hz_field.get())
+        if hz <= 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Polling rate error", "Please enter a valid positive integer for the polling rate.")
+        return  # If invalid polling rate, stop further execution
 
-        # Display the real-time timestamp on the video frame
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        cv2.putText(frame, timestamp, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+    # Start camera recording along with trackers only if polling rate is valid
+    camera.start_camera_recording(selected_camera_index, camera_var, window)  # Start camera recording
+    begin_tracking()          # Start tracker processes
 
-        # Display the video feed in a window
-        cv2.imshow('Camera Feed', frame)
+    toggle_stop()
 
-        # Write to file if recording
-        if is_recording:
-            out.write(frame)
 
-        # Bring the window to the foreground
-        cv2.setWindowProperty('Camera Feed', cv2.WND_PROP_TOPMOST, 1)
+def stop_button_wrapper():
+    stop_output()             # Stop tracking process
+    camera.stop_camera_recording()    # Stop camera recording
+    toggle_stop()
 
-        # Check for key press events to start/stop recording or exit
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('r') and not is_recording:
-            start_recording()
-        elif key == ord('s') and is_recording:
-            stop_recording()
-        elif key == ord('q'):
-            print("Exit")
-            break  
+def toggle_stop():
+    if STARTED:
+        stop_button.config(state="normal")
+        start_button.config(state="disabled")
+    else:
+        stop_button.config(state="disabled")
+        start_button.config(state="normal")
 
-    stop_recording()
+def stop_output():
+    global STARTED
+    if POLHEMUS.get():
+        if polhemus_thread is not None:
+            polhemus_thread.join()  # Wait for the thread to finish
+    if LEAPMOTION.get():
+        print("LeapMotion placeholder")
+    if VIVE.get():
+        print("Vive placeholder")
+    STARTED = False
 
-def find_valid_cameras():
-    """Scan and return a list of valid camera indices."""
-    max_failed_attempts = 2  # Stop after 2 consecutive failed camera attempts
-    failed_attempts = 0
-    available_cameras = list(range(10))  # Check up to 10 camera indices
-    valid_cameras = []
-
-    for i in available_cameras:
-        cap = cv2.VideoCapture(i)
-        if cap.isOpened():
-            valid_cameras.append(i)
-            failed_attempts = 0  # Reset failed attempts after a success
-            cap.release()
-        else:
-            failed_attempts += 1
-            cap.release()
-            if failed_attempts >= max_failed_attempts:
-                print("Stopping search after encountering consecutive failed attempts.")
-                break
-
-    if not valid_cameras:
-        print("No cameras detected.")
-    return valid_cameras
-
-def preview_camera(camera_index):
-    """Preview the selected camera for 3 seconds and then close it."""
-    cap = cv2.VideoCapture(camera_index)
-    if not cap.isOpened():
-        print(f"Error: Could not open camera {camera_index} for preview.")
+def begin_tracking():
+    try:
+        hz = int(hz_field.get())
+    except ValueError:
+        messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.")
         return
 
-    start_time = time.time()
-    while time.time() - start_time < 3:  # Preview for 3 seconds
-        ret, frame = cap.read()
-        if not ret:
-            print(f"Error: Could not read frame from camera {camera_index}.")
-            break
-        
-        cv2.imshow(f'Preview of Camera {camera_index}', frame)
+    global STARTED, start_time
+    if not STARTED:
+        STARTED = True
+        start_time = time.time()
+        stopwatch_label.config(text="00:00:00")
+        start_stopwatch()
+        if POLHEMUS.get():
+            global polhemus_thread
+            polhemus_thread.start()
+        if LEAPMOTION.get():
+            global leapmotion_thread
+            leapmotion_thread.start()
+        if VIVE.get():
+            global vive_thread
+            vive_thread.start()
 
-        # Bring the preview window to the foreground
-        cv2.setWindowProperty(f'Preview of Camera {camera_index}', cv2.WND_PROP_TOPMOST, 1)
+def start_stopwatch():
+    global STARTED
+    if STARTED:
+        elapsed_time = time.time() - start_time
+        milliseconds = int((elapsed_time * 1000) % 1000)
+        seconds = int(elapsed_time) % 60
+        minutes = (int(elapsed_time) // 60) % 60
+        hours = (int(elapsed_time) // 3600) % 24
+        time_str = f"{hours:02}:{minutes:02}:{seconds:02}.{milliseconds:03}"
+        stopwatch_label.config(text=time_str)
+        window.after(10, start_stopwatch)
 
-        # Update the window and ensure proper rendering
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+def select_camera(event):
+    global selected_camera_index
+    selected_camera_index = int(camera_var.get())
+    print(f"Camera {selected_camera_index} selected")
 
-    # Release the camera and properly close the window
-    cap.release()
-    cv2.destroyWindow(f'Preview of Camera {camera_index}')
-    
-    # Add a small wait to ensure OpenCV processes the window closure
-    cv2.waitKey(1)
+camera_dropdown.bind("<<ComboboxSelected>>", select_camera)
 
-def start_camera():
-    """Start the camera and begin processing frames with the system's default settings."""
-    valid_cameras = find_valid_cameras()
+# UI Buttons for trackers
+start_button = tk.Button(window, text="Start", command=start_button_wrapper)
+start_button.grid(row=1, column=3, sticky="ew")
 
-    if not valid_cameras:
-        print("No cameras available to select.")
-        return
+stop_button = tk.Button(window, text="Stop", command=stop_button_wrapper, state="disabled")
+stop_button.grid(row=2, column=3, sticky="ew")
 
-    # Ask the user to preview and select a camera
-    while True:
-        print(f"Valid camera indices: {valid_cameras}")
-        try:
-            camera_index = int(input(f"Enter a camera index to preview from the valid cameras {valid_cameras}: "))
-            if camera_index not in valid_cameras:
-                print(f"Invalid index. Please select from the valid cameras {valid_cameras}.")
-                continue
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-            continue
+file_picker_button = tk.Button(window, text="Save zip to...", command=lambda: filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP Files", "*.zip")]))
+file_picker_button.grid(row=3, column=3)
 
-        # Preview the selected camera for 3 seconds
-        preview_camera(camera_index)
-
-        # Ask if the user wants to use the previewed camera
-        choice = input(f"Do you want to use Camera {camera_index}? (y/n): ").lower()
-        if choice == 'y':
-            break
-
-    if not initialize_camera(camera_index):
-        return
-
-    process_frame()
-
-def stop_camera():
-    """Clean up resources after stopping the camera."""
-    global cap
-    if cap is not None:
-        cap.release()
-    cv2.destroyAllWindows()
-
-# Example usage
+# Start the main event loop and initialize the valid cameras
 if __name__ == "__main__":
     try:
-        start_camera()
-    finally:
-        stop_camera()
+        os.remove("polhemus_output.csv")
+    except:
+        pass
+    try:
+        os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*_data\..*')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
+    except:
+        pass
+    valid_cameras = camera.find_valid_cameras()
+    camera_dropdown["values"] = valid_cameras  # Populate the camera dropdown
+    window.mainloop()
