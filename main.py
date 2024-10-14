@@ -4,6 +4,7 @@ import threading
 import polhemus_interface as pol
 import leapmotion_interface as leapm
 import vive_data_tracker as vive
+import camera_gui_library as camera
 import os
 import zipfile
 import time
@@ -21,6 +22,8 @@ start_time = None
 polhemus_thread = None
 leapmotion_thread = None
 vive_thread = None
+camera_thread = None
+selected_camera_index = None
 
 # Create the main window
 window = tk.Tk()
@@ -31,6 +34,7 @@ window.resizable(False, False)
 POLHEMUS = tk.BooleanVar()
 LEAPMOTION = tk.BooleanVar()
 VIVE = tk.BooleanVar()
+USE_CAMERA = tk.BooleanVar()
 
 # POLLING RATE
 label = tk.Label(window, text="Polling Rate (Hz):")
@@ -41,6 +45,22 @@ hz_field.grid(row=0, column=1)
 # STOPWATCH
 stopwatch_label = tk.Label(window, text="00:00:00.000")
 stopwatch_label.grid(row=0, column=3)
+
+# Add Camera checkbox
+camera_checkbox = tk.Checkbutton(window, text="Camera", variable=USE_CAMERA)
+camera_checkbox.grid(row=4, column=0, sticky="w")
+
+#Dropdown for camera selection
+camera_var = tk.StringVar(value="Select a camera")
+camera_dropdown = ttk.Combobox(window, textvariable=camera_var, values=[], state="readonly")
+camera_dropdown.grid(row=4, column=1)  
+
+# Button for camera preview
+preview_button = tk.Button(window, text="Preview Camera", command=lambda: camera.preview_camera(selected_camera_index))
+preview_button.grid(row=4, column=2) 
+
+
+
 
 def check_leapmotion_service():
     '''
@@ -83,11 +103,26 @@ def start_button_wrapper():
                 os.remove(file)
     except:
         pass
+
+    #Check if valid polling rate is entered
+    try:
+        hz = int(hz_field.get())
+        if hz <= 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Polling rate error", "Please enter a valid positive integer for the polling rate.")
+        return  # If invalid polling rate, stop further execution
+    
+    #Start trackers and camera if selected
     begin_tracking()
+    if USE_CAMERA.get():
+        camera.start_camera_recording(selected_camera_index, camera_var, window)# Start camera recording
     toggle_stop()
 
 def stop_button_wrapper():
-    stop_output()
+    stop_output() #stops all tracker
+    if USE_CAMERA.get():
+        camera.stop_camera_recording() #Stop camera recording
     toggle_stop()
 
 def toggle_stop():
@@ -130,36 +165,17 @@ def stop_output():
         vive.another = False
     STARTED = False
 
-
-def start_output():
-    '''
-    Begins output of Polhemus data.
-    '''
-    global STARTED
-    # Check if hz is valid
-    try:
-        hz = int(hz_field.get())
-    except:
-        STARTED = False
-        raise ValueError("Please enter a valid integer for the frequency.")
-
-    pol.output_data(hz)
-
-def hz_messagebox():
-    messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.", parent=window)
-
 def begin_tracking():
     '''
     Begins output of all selected trackers.
     '''
     # Test if the hz field is an integer
     try:
-        _ = int(hz_field.get())
-    except:
-        hz_messagebox()
-        return
-    if int(hz_field.get()) <= 0:
-        hz_messagebox()
+        hz = int(hz_field.get())
+        if hz < 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Polling rate error", "Please enter a valid integer for the polling rate.")
         return
     else:
         # Check a valid mode is selected for leapmotion
@@ -173,19 +189,19 @@ def begin_tracking():
             start_stopwatch()
             if POLHEMUS.get():
                 pol.stop_event.clear()
-                polhemus_thread = threading.Thread(target=start_output, daemon=True)
+                polhemus_thread = threading.Thread(target=pol.output_data, args=(hz,), daemon=True)
                 polhemus_thread.start()
             if LEAPMOTION.get():
                 leapm.another = True
                 leapm.SELECTED_MODE = leapm.tracking_modes[leapmotion_mode.get()]
-                leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(int(hz_field.get()),))
+                leapmotion_thread = threading.Thread(target=leapm.initialise_leapmotion, daemon=True, args=(hz,))
                 leapmotion_thread.start()
             if VIVE.get():
                 # Initialize OpenVR
                 try:
                     vive.openvr.init(vive.openvr.VRApplication_Scene)
                     vive.another = True
-                    vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(int(hz_field.get()),))
+                    vive_thread = threading.Thread(target=vive.start_vive, daemon=True, args=(hz,))
                     vive_thread.start()
                 # Since VR is the last to be initialised, sending the stop button signal if failed will stop all other threads too
                 except:
@@ -203,6 +219,10 @@ def open_file_picker():
         print(file_path)
         file_list = ["polhemus_output.csv", "leapmotion_output.csv"]
         file_list.extend(vive.files)
+
+        if camera.camera_output_file:
+            file_list.append(camera.camera_output_file)
+
         zip_files(file_list, file_path)
     else:
         print("Cannot save file while tracking.")
@@ -219,6 +239,7 @@ def start_stopwatch():
         time_str = f"{hours:02}:{minutes:02}:{seconds:02}.{milliseconds:03}"
         stopwatch_label.config(text=time_str)
         window.after(10, start_stopwatch) 
+        
 
 def zip_files(files: list[str], zip_name: str):
     with zipfile.ZipFile(zip_name, "w") as zipf:
@@ -226,9 +247,16 @@ def zip_files(files: list[str], zip_name: str):
             try:
                 zipf.write(file, os.path.basename(file))
             except:
-                # File does not exist (that tracker must not have been used)
+                # File does not exist (that tracker or camera must not have been used)
                 pass
 
+
+def select_camera(event):
+    global selected_camera_index
+    selected_camera_index = int(camera_var.get())
+    print(f"Camera {selected_camera_index} selected")
+
+camera_dropdown.bind("<<ComboboxSelected>>", select_camera)
 
 # UI Buttons
 start_button = tk.Button(window, text="Start", command=start_button_wrapper)
@@ -258,4 +286,6 @@ if __name__ == "__main__":
     except:
         pass
     pol.initialise_polhemus(1)
+    valid_cameras = camera.find_valid_cameras()
+    camera_dropdown["values"] = valid_cameras #populate the camera dropdown
     window.mainloop()
