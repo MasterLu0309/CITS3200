@@ -302,6 +302,49 @@ file_picker_button.grid(row=3, column=3)
 help_button = tk.Button(window, text="Help", command=show_help)
 help_button.grid(row=4, column=3, sticky="ew", padx=5, pady=5)
 
+def start_timed_recording():
+    '''
+    Starts the recording for a user-specified time duration (in minutes).
+    After the specified time, it will automatically stop the recording.
+    '''
+    try:
+        # Get the duration entered by the user
+        minutes = int(duration_field.get())
+        if minutes <= 0:
+            raise ValueError("Duration must be a positive integer")
+    except ValueError:
+        # Show an error message if the input is invalid
+        messagebox.showerror("Invalid Duration", "Please enter a valid positive integer for the recording duration.")
+        return
+
+    # Convert minutes to milliseconds for the `window.after()` function
+    duration_ms = minutes * 60 * 1000
+
+    # Start the trackers and camera recording
+    start_button_wrapper()
+
+    # Schedule the stop after the specified duration
+    window.after(duration_ms, stop_timed_recording)
+
+def stop_timed_recording():
+    '''
+    Automatically stops the recording after the preset time duration.
+    '''
+    # Stop all trackers and camera recording
+    stop_button_wrapper()
+
+
+
+# Add a label and entry field for the user to specify the recording duration (in minutes)
+label_duration = tk.Label(window, text="Recording Duration (mins):")
+label_duration.grid(row=5, column=0)
+
+duration_field = tk.Entry(window)
+duration_field.grid(row=5, column=1)
+
+# Add a new button for timed recording
+timed_button = tk.Button(window, text="Start Timed Recording", command=start_timed_recording)
+timed_button.grid(row=5, column=3, sticky="ew")
 
 
 
