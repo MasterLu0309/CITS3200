@@ -46,18 +46,20 @@ hz_field.grid(row=0, column=1)
 stopwatch_label = tk.Label(window, text="00:00:00.000")
 stopwatch_label.grid(row=0, column=3)
 
+# Add Camera checkbox
+camera_checkbox = tk.Checkbutton(window, text="Camera", variable=USE_CAMERA)
+camera_checkbox.grid(row=4, column=0, sticky="w")
+
 #Dropdown for camera selection
 camera_var = tk.StringVar(value="Select a camera")
 camera_dropdown = ttk.Combobox(window, textvariable=camera_var, values=[], state="readonly")
-camera_dropdown.grid(row=4, column=0)
+camera_dropdown.grid(row=4, column=1)  
 
 # Button for camera preview
 preview_button = tk.Button(window, text="Preview Camera", command=lambda: camera.preview_camera(selected_camera_index))
-preview_button.grid(row=4, column=1)
+preview_button.grid(row=4, column=2) 
 
-# Add Camera checkbox
-camera_checkbox = tk.Checkbutton(window, text="Camera", variable=USE_CAMERA)
-camera_checkbox.grid(row=4, column=2, sticky="w")
+
 
 
 def check_leapmotion_service():
@@ -163,22 +165,6 @@ def stop_output():
         vive.another = False
     STARTED = False
 
-
-'''def start_output():
-    
-   # Begins output of Polhemus data.
-    
-    global STARTED
-    # Check if hz is valid
-    try:
-        hz = int(hz_field.get())
-    except:
-        STARTED = False
-        raise ValueError("Please enter a valid integer for the frequency.")
-
-    pol.output_data(hz)'''
-
-
 def begin_tracking():
     '''
     Begins output of all selected trackers.
@@ -233,6 +219,10 @@ def open_file_picker():
         print(file_path)
         file_list = ["polhemus_output.csv", "leapmotion_output.csv"]
         file_list.extend(vive.files)
+
+        if camera.camera_output_file:
+            file_list.append(camera.camera_output_file)
+
         zip_files(file_list, file_path)
     else:
         print("Cannot save file while tracking.")
@@ -257,7 +247,7 @@ def zip_files(files: list[str], zip_name: str):
             try:
                 zipf.write(file, os.path.basename(file))
             except:
-                # File does not exist (that tracker must not have been used)
+                # File does not exist (that tracker or camera must not have been used)
                 pass
 
 
