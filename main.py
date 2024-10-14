@@ -115,7 +115,7 @@ def start_button_wrapper():
     
     #Check if camera is selected and check if valid camera selected
     if USE_CAMERA.get():
-        if not selected_camera_index:
+        if  selected_camera_index is None:
             messagebox.showerror("Camera Selection Error", "Please select a camera before starting.")
             return  # If no camera selected, stop further execution
     
