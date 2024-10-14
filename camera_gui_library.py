@@ -10,7 +10,7 @@ is_recording = False
 selected_camera_index = None
 camera_output_file = None
 
-
+#Open up camera
 def initialize_camera(camera_index):
     global cap
     cap = cv2.VideoCapture(camera_index)
@@ -35,13 +35,14 @@ def start_camera_recording(selected_camera_index, camera_var, window):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     camera_output_file = f"output_{timestamp}.mov"
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0 #Default to 30 fps if cant get default fps of camera
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  #Default camera resolution
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) #Default camera resolution
     out = cv2.VideoWriter(camera_output_file, fourcc, fps, (width, height))
     is_recording = True
     process_frame(window)
 
+#Releases resources after stopping recording
 def stop_camera_recording():
     global out, is_recording
     if is_recording:
@@ -50,6 +51,7 @@ def stop_camera_recording():
         cap.release()
         cv2.destroyAllWindows()
 
+#3 second preview of camera that will be used
 def preview_camera(selected_camera_index):
     global cap
     if selected_camera_index is None:
@@ -87,7 +89,7 @@ def process_frame(window):
         cv2.imshow('Camera Feed', frame)
         out.write(frame)
         window.after(10, lambda: process_frame(window))
-#List range of indexes to check for cameras
+#List range of indexes (0-9) to check for cameras
 def find_valid_cameras():
     available_cameras = list(range(10))
     valid_cameras = []
