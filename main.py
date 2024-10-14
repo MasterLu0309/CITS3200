@@ -264,20 +264,6 @@ def select_camera(event):
 
 camera_dropdown.bind("<<ComboboxSelected>>", select_camera)
 
-# UI Buttons
-start_button = tk.Button(window, text="Start", command=start_button_wrapper)
-start_button.grid(row=1, column=3, sticky="ew")
-
-stop_button = tk.Button(window, text="Stop", command=stop_button_wrapper, state="disabled")
-stop_button.grid(row=2, column=3, sticky="ew")
-
-file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
-file_picker_button.grid(row=3, column=3)
-
-# Add the Help button
-help_button = tk.Button(window, text="Help", command=show_help)
-help_button.grid(row=4, column=3, sticky="ew", padx=5, pady=5)
-
 # Help button function
 def show_help():
     '''
@@ -301,6 +287,22 @@ def show_help():
         "- Please view Code documentation if you wish to customise this program."
     )
     messagebox.showinfo("Help", help_text)
+
+# UI Buttons
+start_button = tk.Button(window, text="Start", command=start_button_wrapper)
+start_button.grid(row=1, column=3, sticky="ew")
+
+stop_button = tk.Button(window, text="Stop", command=stop_button_wrapper, state="disabled")
+stop_button.grid(row=2, column=3, sticky="ew")
+
+file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
+file_picker_button.grid(row=3, column=3)
+
+# Add the Help button
+help_button = tk.Button(window, text="Help", command=show_help)
+help_button.grid(row=4, column=3, sticky="ew", padx=5, pady=5)
+
+
 
 
 
