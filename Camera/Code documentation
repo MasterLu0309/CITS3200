@@ -1,0 +1,75 @@
+"""
+Tracker and Camera Interface Application
+
+This programme offers an integrated camera system and a graphical user interface (GUI) for communicating with several motion trackers (Polhemus, LeapMotion, and Vive). 
+Users may choose which trackers they want to use, decide how often to poll for data collecting, and manage camera recording. The programme offers the ability to store tracking 
+data as a zipped zip file, start and end tracking sessions, and see the camera feed.
+
+Dependencies:
+-------------
+- tkinter: Provides the GUI framework.
+- threading: Used to run tracker processes concurrently in separate threads.
+- camera_gui_library: Custom module for camera-related functionality (e.g., camera preview, recording).
+- os, re, time: For system operations, file handling, and time-based calculations.
+
+Global Variables:
+-----------------
+STARTED : bool
+    Flag indicating whether tracking and recording have started.
+start_time : float
+    Stores the time at which tracking started, used for stopwatch calculations.
+polhemus_thread, leapmotion_thread, vive_thread : threading.Thread
+    Threads to handle the concurrent processes for each tracker.
+selected_camera_index : int
+    Stores the index of the camera selected from the dropdown menu.
+
+Interface Variables:
+--------------------
+POLHEMUS, LEAPMOTION, VIVE : tkinter.BooleanVar
+    Boolean variables representing whether each tracker is selected by the user.
+hz_field : tkinter.Entry
+    Text field for entering the polling rate (in Hz) for the trackers.
+stopwatch_label : tkinter.Label
+    Label for displaying the elapsed time since tracking started.
+camera_var : tkinter.StringVar
+    Stores the selected camera from the camera dropdown.
+
+Main Functions:
+---------------
+- start_button_wrapper(): Starts tracking and camera recording if polling rate is valid.
+- stop_button_wrapper(): Stops all tracker processes and camera recording.
+- toggle_stop(): Toggles the state of the Start and Stop buttons based on whether tracking is active.
+- stop_output(): Stops the output of the selected trackers.
+- begin_tracking(): Initializes and starts tracking for the selected trackers and begins recording the camera.
+- start_stopwatch(): Updates the stopwatch display, showing elapsed time since tracking started.
+- select_camera(): Callback function that sets the selected camera based on the user's selection in the dropdown menu.
+
+Utility Functions:
+------------------
+- start_stopwatch(): Continuously updates the stopwatch display, showing the time elapsed since tracking started.
+- select_camera(): Sets the selected camera index when a camera is selected from the dropdown.
+
+Interface Components:
+---------------------
+- Checkboxes for selecting Polhemus, Leapmotion, Vive trackers.
+- A timer for tracking that shows the amount of time elapsed.
+- Dropdown for selecting the camera to use.
+- Buttons for starting/stopping tracking and saving the output.
+- A field where the polling rate can be specified.
+
+Example Usage:
+--------------
+1. Launch the application by running the script.
+2. Select desired trackers and the camera from the GUI.
+3. Set a valid polling rate and click "Start" to begin tracking and recording.
+4. Click "Stop" to terminate the recording and tracking session.
+5. Optionally save the output data as a zip file by using the "Save zip to..." button.
+
+"""
+
+
+
+
+
+
+
