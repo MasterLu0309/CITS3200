@@ -113,6 +113,12 @@ def start_button_wrapper():
         messagebox.showerror("Polling rate error", "Please enter a valid positive integer for the polling rate.")
         return  # If invalid polling rate, stop further execution
     
+    #Check if camera is selected and check if valid camera selected
+    if USE_CAMERA.get():
+        if not selected_camera_index:
+            messagebox.showerror("Camera Selection Error", "Please select a camera before starting.")
+            return  # If no camera selected, stop further execution
+    
     #Start trackers and camera if selected
     begin_tracking()
     if USE_CAMERA.get():
