@@ -274,6 +274,10 @@ stop_button.grid(row=2, column=3, sticky="ew")
 file_picker_button = tk.Button(window, text="Save zip to...", command=open_file_picker)
 file_picker_button.grid(row=3, column=3)
 
+# Add the Help button
+help_button = tk.Button(window, text="Help", command=show_help)
+help_button.grid(row=4, column=3, sticky="ew", padx=5, pady=5)
+
 # Help button function
 def show_help():
     '''
@@ -283,23 +287,22 @@ def show_help():
         "Welcome to the Tracker Interface Help!\n\n"
         "- To start tracking, make sure to select the trackers and set a valid polling rate, no negatives!\n"
         "- The 'Camera' checkbox allows you to select a camera and record video.\n"
-        "- If 'Camera' checkbox is selected make sure you select a camera to use."
-        "- The Select a camera drop down lists numbers that each correspond to a different camera."
+        "- If 'Camera' checkbox is selected make sure you select a camera to use\n."
+        "- The Select a camera drop down lists numbers that each correspond to a different camera\n."
         "- Use the 'Preview Camera' button to ensure the camera is working.\n"
         "- Click 'Start' to begin tracking and recording.\n"
         "- Click 'Stop' to end the tracking and recording.\n"
         "- Use 'Save zip to...' to save your results in a zip file.\n"
+        "\n\n"
 
         "Quick Troubleshooting\n\n"
-        "- If you hit start after selecting a camera and you notice a bunch of ERRORS, Camera index out of range it can be ignored\n"
-        "- If you are noticing data files disappearing when you run the program a second time without saving the files into a zip file\n it is because it deletes the files in the current directory if they are not moved or saved as a zip\n"
+        "- If you hit start after selecting a camera and you notice the error getStreamChannelGroup Camera index out of range it can be ignored\n"
+        "- If you are noticing data files disappearing when you run the program a second time without saving the files into a zip file it is because it deletes the files in the current directory if they are not moved or saved as a zip\n"
         "- Please view Code documentation if you wish to customise this program."
     )
     messagebox.showinfo("Help", help_text)
 
-# Add the Help button
-help_button = tk.Button(window, text="Help", command=show_help)
-help_button.grid(row=4, column=3, sticky="se", padx=5, pady=5)
+
 
 
 
