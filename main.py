@@ -103,7 +103,13 @@ def start_button_wrapper():
                 os.remove(file)
     except:
         pass
-
+    try:
+        pattern = re.compile(r'.*\.mov$')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
+    except:
+        pass
     #Check if valid polling rate is entered
     try:
         hz = int(hz_field.get())
@@ -361,6 +367,13 @@ if __name__ == "__main__":
         pass
     try:
         os.remove("leapmotion_output.csv")
+    except:
+        pass
+    try:
+        pattern = re.compile(r'.*\.mov$')
+        for file in os.listdir('./'):
+            if pattern.match(file):
+                os.remove(file)
     except:
         pass
     try:
