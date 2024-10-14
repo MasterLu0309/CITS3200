@@ -60,6 +60,9 @@ def get_tracker_data():
 
     # Loop through all devices and collect their pose data
     for i in range(len(poses)):
+        if not openvr.VRSystem().isTrackedDeviceConnected(i):
+            continue  # Skip if the device is not connected
+
         total_devices += 1
         if poses[i].bPoseIsValid:  # Check if the pose is valid (i.e., usable tracking data)
             successful_reads += 1
