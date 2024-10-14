@@ -8,17 +8,24 @@ cap = None
 out = None
 is_recording = False
 selected_camera_index = None
+camera_output_file = None
+
 
 def initialize_camera(camera_index):
     global cap
     cap = cv2.VideoCapture(camera_index)
     if not cap.isOpened():
-        messagebox.showerror("Error", f"Could not open camera {camera_index}")
+        messagebox.showerror("Error", f"Could not open camera {camera_index}. Please ensure camera connected and avaiable")
         return False
     return True
 
+#Records camera frames in default fps, resolution, mp4 fromat converted to mov
 def start_camera_recording(selected_camera_index, camera_var, window):
-    global out, is_recording
+    global out, is_recording, camera_output_file
+
+    if is_recording:
+        messagebox.showinfo("Recording already started")
+        return
     if selected_camera_index is None:
         messagebox.showerror("Error", "Please select a camera first.")
         return
@@ -26,12 +33,12 @@ def start_camera_recording(selected_camera_index, camera_var, window):
         return
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"output_{timestamp}.mov"
+    camera_output_file = f"output_{timestamp}.mov"
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(camera_output_file, fourcc, fps, (width, height))
     is_recording = True
     process_frame(window)
 
@@ -54,17 +61,20 @@ def preview_camera(selected_camera_index):
         return
 
     start_time = datetime.datetime.now().timestamp()
-    while datetime.datetime.now().timestamp() - start_time < 3:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        cv2.imshow(f"Preview of Camera {selected_camera_index}", frame)
-        cv2.setWindowProperty(f"Preview of Camera {selected_camera_index}", cv2.WND_PROP_TOPMOST, 1)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    cap.release()
-    cv2.destroyAllWindows()
+    try:
+        while datetime.datetime.now().timestamp() - start_time < 3:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            cv2.imshow(f"Preview of Camera {selected_camera_index}", frame)
+            cv2.setWindowProperty(f"Preview of Camera {selected_camera_index}", cv2.WND_PROP_TOPMOST, 1)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
+#Process each frame recorded with time stamps real time
 def process_frame(window):
     global out, is_recording
     if is_recording:
@@ -77,13 +87,15 @@ def process_frame(window):
         cv2.imshow('Camera Feed', frame)
         out.write(frame)
         window.after(10, lambda: process_frame(window))
-
+#List range of indexes to check for cameras
 def find_valid_cameras():
     available_cameras = list(range(10))
     valid_cameras = []
     for i in available_cameras:
         cap = cv2.VideoCapture(i)
         if cap.isOpened():
-            valid_cameras.append(i)
+            ret, frame = cap.read()
+            if ret:
+                valid_cameras.append(i)
         cap.release()
     return valid_cameras
